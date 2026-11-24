@@ -176,6 +176,10 @@ class Contrato(Base):
     ine_archivo: Mapped[str] = mapped_column(String(120), default="")   # en PRIVADO_DIR, nunca público
     dias_exhibicion: Mapped[int] = mapped_column(Integer, default=60)
     dias_pago: Mapped[int] = mapped_column(Integer, default=7)
+    # Consignación: cuotas acordadas en cada contrato (vacías = se llenan a mano en el impreso)
+    cuota_retiro: Mapped[int | None] = mapped_column(Integer, nullable=True)       # por pieza, retiro anticipado
+    almacenaje_semana: Mapped[int | None] = mapped_column(Integer, nullable=True)  # por pieza por semana
+    dias_gracia: Mapped[int] = mapped_column(Integer, default=15)                  # tras el aviso, antes de cobrar almacenaje
     notas: Mapped[str] = mapped_column(Text, default="")
     firmado: Mapped[bool] = mapped_column(Boolean, default=False)
     fecha_firma: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

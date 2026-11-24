@@ -18,6 +18,10 @@
     <label>Clave de elector / folio INE <small>(opcional)</small><input name="ine_clave" value="{{ c.ine_clave if c else '' }}"></label>
     <label class="soloconsigna">Días en exhibición<input name="dias_exhibicion" type="number" min="1" value="{{ c.dias_exhibicion if c else 60 }}"></label>
     <label class="soloconsigna">Pago al vendedor (días tras la venta)<input name="dias_pago" type="number" min="0" value="{{ c.dias_pago if c else 7 }}"></label>
+    <label class="soloconsigna">Cuota por retiro anticipado <small>(por pieza, opcional)</small><input name="cuota_retiro" type="number" min="0" inputmode="numeric" placeholder="Se acuerda" value="{{ c.cuota_retiro if c and c.cuota_retiro is not none else '' }}"></label>
+    <label class="soloconsigna">Almacenaje <small>(por pieza por semana, opcional)</small><input name="almacenaje_semana" type="number" min="0" inputmode="numeric" placeholder="Se acuerda" value="{{ c.almacenaje_semana if c and c.almacenaje_semana is not none else '' }}"></label>
+    <label class="soloconsigna">Días para recoger sin costo <small>(después del aviso)</small><input name="dias_gracia" type="number" min="0" value="{{ c.dias_gracia if c else 15 }}"></label>
+    <p class="soloconsigna ancho2 nota-campo"><small>Si dejas las cuotas vacías, en el contrato salen como línea para llenarlas a mano. Para artículos caros o grandes puedes anotar un monto distinto en "Condiciones adicionales".</small></p>
   </fieldset>
 
   <fieldset class="ancho piezas-fs" {{ 'disabled' if bloqueado }}>

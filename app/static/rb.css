@@ -661,3 +661,4 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
 .v-contrato li{text-align:left;margin:0 0 4px}
 .v-contrato li b{display:inline;width:auto;height:auto;background:none;border-radius:0;margin:0;font-size:inherit;color:inherit}
 @media (max-width:640px){.v-contrato{padding:14px 16px}.v-contrato ul{padding-left:18px}}
+.nota-campo{margin:0;color:#555}

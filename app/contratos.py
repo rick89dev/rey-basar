@@ -69,6 +69,9 @@ async def guardar(request: Request, yo: Usuario = Depends(solo_admin), db=Depend
     c.ine_clave = (f.get("ine_clave") or "").strip().upper()[:30]
     c.dias_exhibicion = _entero(f.get("dias_exhibicion")) or 60
     c.dias_pago = _entero(f.get("dias_pago")) or 7
+    c.cuota_retiro = _entero(f.get("cuota_retiro"))
+    c.almacenaje_semana = _entero(f.get("almacenaje_semana"))
+    c.dias_gracia = _entero(f.get("dias_gracia")) or 15
     c.notas = (f.get("notas") or "").strip()[:2000]
     # piezas: se reemplazan con lo que viene en el formulario (conservando el vínculo a producto)
     previas = {p.id: p for p in c.piezas}
@@ -186,7 +189,8 @@ def formato_en_blanco(modalidad: str, yo: Usuario = Depends(solo_admin)):
         raise HTTPException(404)
     c = SimpleNamespace(modalidad=modalidad, piezas=[], firmado=False, fecha_firma=None, notas="",
                         nombre="", ine_clave="", telefono="", domicilio="", folio="",
-                        total_venta=0, total_vendedor=0, dias_pago=0, dias_exhibicion=0, ine_archivo="")
+                        total_venta=0, total_vendedor=0, dias_pago=0, dias_exhibicion=0, ine_archivo="",
+                        cuota_retiro=None, almacenaje_semana=None, dias_gracia=0)
     html = templates.get_template("admin/contrato_pdf.html").render(
         c=c, hoy=datetime.now(), requiere_ine=False, firmas={}, tam={}, blanco=True, ine_desde=config.INE_DESDE)
     salida = BytesIO()
