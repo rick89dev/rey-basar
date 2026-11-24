@@ -30,8 +30,8 @@ OPENAI_API_KEY = os.getenv("REYBASAR_OPENAI_API_KEY") or os.getenv("OPENAI_API_K
 IA_MODELO = os.getenv("REYBASAR_IA_MODELO", "gpt-4o")
 BOT_TOKEN = os.getenv("REYBASAR_BOT_TOKEN", "")  # Bearer para el bot de WhatsApp
 
-WHATSAPP = os.getenv("REYBASAR_WHATSAPP", "527774166464")
-TELEFONO = os.getenv("REYBASAR_TELEFONO", "(777) 416 64 64")
+WHATSAPP = os.getenv("REYBASAR_WHATSAPP", "527773525475")
+TELEFONO = os.getenv("REYBASAR_TELEFONO", "(777) 352 54 75")
 ACTUALIZACION_LEGAL = os.getenv("REYBASAR_ACTUALIZACION_LEGAL", "24 de noviembre de 2026")
 FACEBOOK = os.getenv("REYBASAR_FACEBOOK", "https://www.facebook.com/ReyBasarOnline")
 
@@ -62,8 +62,6 @@ CATEGORIA_NOMBRE = dict(CATEGORIAS)
 # Categorías con submenú
 SUBCATEGORIAS = {
     "ropa": [("dama", "Dama"), ("caballero", "Caballero"), ("ninas", "Niñas"), ("ninos", "Niños")],
-    "deportes": [("hombre", "Hombre"), ("mujer", "Mujer"), ("ninos", "Niños"), ("ninas", "Niñas"),
-                 ("equipo", "Equipo y ejercicio")],
 }
 # Categorías que antes eran principales (nov 2026): hoy son subcategorías de Ropa.
 CATEGORIAS_ANTERIORES = {"dama": "ropa", "caballero": "ropa", "ninas": "ropa", "ninos": "ropa"}

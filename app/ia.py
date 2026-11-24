@@ -28,16 +28,14 @@ Devuelve:
   lo que dijo el dueño: prenda, color, corte, detalles, estado. Si el dueño menciona un detalle o
   defecto, inclúyelo con honestidad. Prohibido inventar medidas, materiales, tallas o marcas. Nada
   de "excelente calidad". No menciones precios.
-- categoria: una de {categorias}. Ropa, calzado y accesorios de uso diario van en "ropa";
-  aparatos (celulares, audífonos, consolas, bocinas, cargadores) van en "electronicos"; ropa,
-  calzado o artículos para hacer deporte (balones, tenis deportivos, uniformes, pants deportivos,
-  raquetas, guantes de box, ligas, pesas, tapetes de yoga) van en "deportes"; albercas, flotadores,
+- categoria: una de {categorias}. Ropa, calzado y accesorios van en "ropa", incluida la ropa y el
+  calzado deportivo (pants, tenis, uniformes); aparatos (celulares, audífonos, consolas, bocinas, cargadores) van en "electronicos"; equipo y
+  artículos para hacer deporte o ejercicio (balones, raquetas, guantes de box, ligas, pesas, tapetes
+  de yoga, cuerdas para saltar) van en "deportes"; albercas, flotadores,
   inflables, chalecos salvavidas, lentes de natación y artículos de playa o verano van en "alberca".
   Si no se puede saber, "otros".
 - subcategoria: si la categoría es "ropa": "dama", "caballero", "ninas" o "ninos" según para quién
-  es. Si es "deportes": "hombre", "mujer", "ninos" o "ninas" para ropa o calzado deportivo según para
-  quién es, o "equipo" para artículos para hacer ejercicio o deporte (guantes, ligas, pesas, balones,
-  raquetas). En cualquier otra categoría, o si no se puede saber, null.
+  es. En cualquier otra categoría, o si no se puede saber, null.
 - condicion: "nuevo" si el dueño dice nuevo / con etiqueta / sin usar, o se ve la etiqueta de tienda
   colgando; si no, "usado".
 - talla: la que dijo el dueño o la que se lea en la etiqueta ("M", "10", "26 MX"). null si no se sabe.
@@ -59,7 +57,7 @@ ESQUEMA = {
         "nombre": {"type": "string"},
         "descripcion": {"type": "string"},
         "categoria": {"type": "string", "enum": [k for k, _ in CATEGORIAS if k != "demo"]},
-        "subcategoria": {"type": ["string", "null"], "enum": ["dama", "caballero", "ninos", "ninas", "hombre", "mujer", "equipo", None]},
+        "subcategoria": {"type": ["string", "null"], "enum": ["dama", "caballero", "ninos", "ninas", None]},
         "condicion": {"type": "string", "enum": ["nuevo", "usado"]},
         "talla": {"type": ["string", "null"]},
         "marca": {"type": ["string", "null"]},

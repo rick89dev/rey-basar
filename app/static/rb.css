@@ -204,10 +204,10 @@ input,select,textarea{font:inherit;font-weight:400;padding:9px 12px;border:1px s
 .calc-res p{margin:3px 0;font-size:17px}
 .calc-res b{font-size:21px}
 .v-pasos ol{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto}
-.v-pasos li{text-align:center}
-.v-pasos li b{display:grid;place-items:center;width:50px;height:50px;background:#000;color:#fff;border-radius:50%;margin:0 auto;font-size:22px}
-.v-pasos h4{margin:10px 0 4px;font-size:18px}
-.v-pasos li p{margin:0;color:#444}
+.v-pasos ol>li{text-align:center}
+.v-pasos ol>li>b{display:grid;place-items:center;width:50px;height:50px;background:#000;color:#fff;border-radius:50%;margin:0 auto;font-size:22px}
+.v-pasos ol h4{margin:10px 0 4px;font-size:18px}
+.v-pasos ol>li>p{margin:0;color:#444}
 .v-acepta{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1000px;margin:30px auto 0}
 .v-acepta div{background:var(--gris);padding:16px 22px}
 .v-acepta h4{margin:0 0 4px;text-transform:uppercase;letter-spacing:.1em}
@@ -369,7 +369,7 @@ legend{font-weight:600}
 .pill-desc,.sello-etq{background:var(--oro);color:#000}
 .pronto{background:#fff6dd}
 .v-tag{background:var(--oro)}
-.v-pasos li b{background:var(--oro);color:#000}
+.v-pasos ol>li>b{background:var(--oro);color:#000}
 .ft{border-top:5px solid var(--oro)}
 
 /* Cuentas y pedidos */
@@ -658,3 +658,6 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
 .formato-blanco{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px dashed #bbb;border-radius:8px;padding:10px 14px;margin:0 0 16px;background:#fff}
 .formato-blanco .btn-negro-borde{padding:8px 16px;font-size:13px}
 .formato-blanco small{flex-basis:100%;color:#555}
+.v-contrato li{text-align:left;margin:0 0 4px}
+.v-contrato li b{display:inline;width:auto;height:auto;background:none;border-radius:0;margin:0;font-size:inherit;color:inherit}
+@media (max-width:640px){.v-contrato{padding:14px 16px}.v-contrato ul{padding-left:18px}}

@@ -77,8 +77,8 @@ def categoria(request: Request, clave: str, sub: str = "", condicion: str = "", 
     if clave not in CATEGORIA_NOMBRE:
         raise HTTPException(404)
     subs = SUBCATEGORIAS.get(clave, [])
-    if sub and sub not in dict(subs):
-        raise HTTPException(404)
+    if sub and sub not in dict(subs):   # subcategoría que ya no existe → a la categoría
+        return RedirectResponse(f"/categoria/{clave}", 301)
     productos = catalogo.listar(db, categoria=clave, subcategoria=sub or None, condicion=condicion or None,
                                 orden=orden)
     titulo = CATEGORIA_NOMBRE[clave] + (f" · {dict(subs)[sub]}" if sub else "")

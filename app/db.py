@@ -360,6 +360,8 @@ def _mover_ropa_a_subcategorias() -> None:
     with engine.begin() as con:
         con.execute(text("UPDATE productos SET subcategoria = categoria, categoria = 'ropa' "
                          "WHERE categoria IN ('dama', 'caballero', 'ninas', 'ninos')"))
+        # Deportes ya no tiene subcategorías: solo equipo y ejercicio.
+        con.execute(text("UPDATE productos SET subcategoria = '' WHERE categoria = 'deportes' AND subcategoria != ''"))
 
 
 def _agregar_columnas_faltantes() -> None:
