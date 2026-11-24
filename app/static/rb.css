@@ -662,3 +662,32 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
 .v-contrato li b{display:inline;width:auto;height:auto;background:none;border-radius:0;margin:0;font-size:inherit;color:inherit}
 @media (max-width:640px){.v-contrato{padding:14px 16px}.v-contrato ul{padding-left:18px}}
 .nota-campo{margin:0;color:#555}
+.v-ventaja{padding:10px 20px 20px}
+.v-ventaja-intro{text-align:center;margin:-6px 0 16px;color:#444}
+.v-comp{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1000px;margin:0 auto}
+.v-comp-col{padding:20px 24px;border:2px solid #000}
+.v-comp-col h3{margin:0 0 10px;font-size:18px;text-transform:uppercase;letter-spacing:.06em}
+.v-comp-col ul{list-style:none;margin:0;padding:0}
+.v-comp-col li{position:relative;padding:6px 0 6px 30px;line-height:1.45}
+.v-comp-col li::before{position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700}
+.v-comp-col.tu{background:#f3f3f3;border-color:#d0d0d0;color:#444}
+.v-comp-col.tu li::before{content:"✕";background:#d0d0d0;color:#444}
+.v-comp-col.rb{background:#000;color:#fff}
+.v-comp-col.rb h3{color:var(--oro)}
+.v-comp-col.rb li::before{content:"✓";background:var(--oro);color:#000}
+@media (max-width:640px){.v-comp{grid-template-columns:1fr;gap:12px}.v-comp-col{padding:16px 18px}}
+.sobre{max-width:820px;margin:0 auto;padding:30px 20px 40px}
+.sobre h1{text-transform:uppercase;letter-spacing:.06em;font-size:34px;margin:0 0 20px;text-align:center}
+.sobre-bloque{margin:0 0 28px}
+.sobre-bloque h2{font-size:20px;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;padding-bottom:6px;border-bottom:3px solid var(--oro);display:inline-block}
+.sobre-bloque p,.sobre-bloque li{font-size:17px;line-height:1.65;color:#222}
+.sobre-bloque ul{padding-left:20px}
+.sobre-nombre{background:#000;color:#fff;padding:24px 28px}
+.sobre-nombre h2{color:#fff}
+.sobre-nombre p{color:#eee}
+.sobre-letras{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+.sobre-letras span{display:grid;place-items:center;width:46px;height:56px;border:2px solid #555;font-size:30px;font-weight:700;color:#777}
+.sobre-letras span.on{border-color:var(--oro);background:var(--oro);color:#000}
+.sobre-letras i{width:14px}
+.sobre-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+@media (max-width:640px){.sobre h1{font-size:28px}.sobre-nombre{padding:20px 18px}.sobre-letras{gap:4px}.sobre-letras span{width:32px;height:42px;font-size:22px}.sobre-letras i{width:6px}}

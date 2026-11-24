@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Sobre nosotros · ReyBasar{% endblock %}
+{% block meta %}ReyBasar es un proyecto familiar de Cuernavaca que nació en 2019 para dar una segunda vida a la ropa y los juguetes. Y sí: Basar con S tiene su razón.{% endblock %}
+{% block contenido %}
+<section class="sobre">
+  <h1>Sobre nosotros</h1>
+
+  <div class="sobre-bloque">
+    <h2>Nuestra historia</h2>
+    <p>ReyBasar nació en <b>2019</b> en Cuernavaca, Morelos, como un proyecto familiar con una idea sencilla: que la ropa y los juguetes en buen estado tengan una segunda vida y lleguen a otra familia a buen precio.</p>
+    <p>Con la llegada de la pandemia de COVID-19 tuvimos que pausar el proyecto. Hoy lo retomamos con más ganas y con una tienda en línea donde cada pieza está revisada, fotografiada y lista para estrenar dueño.</p>
+  </div>
+
+  <div class="sobre-bloque sobre-nombre">
+    <h2>¿Basar con S?</h2>
+    <p class="sobre-letras" aria-label="REY BASAR"><span class="on">R</span><span class="on">E</span><span class="on">Y</span><i></i><span>B</span><span>A</span><span class="on">S</span><span>A</span><span>R</span></p>
+    <p>Sí, lo sabemos: <i>bazar</i> se escribe con Z. <b>No es un error de ortografía.</b></p>
+    <p>Cuando elegimos el nombre quisimos que cada una de las personas que comenzamos este proyecto estuviera presente con la inicial de su nombre. Así, <b>REY</b> se forma con tres de esas iniciales, y la <b>S</b> de Basar es la de alguien muy especial para nosotros. Por eso, aunque se lea como bazar, para nosotros siempre será <b>ReyBasar</b>.</p>
+  </div>
+
+  <div class="sobre-bloque">
+    <h2>Qué hacemos</h2>
+    <ul>
+      <li>Vendemos ropa y juguetes <b>nuevos y seminuevos</b>, revisados y en buen estado.</li>
+      <li>Entregamos en <b>{{ cfg.ENTREGA_CIUDAD }}</b> y acordamos contigo el punto de entrega.</li>
+      <li>Si tienes ropa o juguetes que ya no usas, <b>te los compramos</b> o los vendemos por ti a consignación.</li>
+    </ul>
+  </div>
+
+  <div class="sobre-cta">
+    <a href="/nuevos" class="btn-negro">VER CATÁLOGO</a>
+    <a href="/quiero-vender" class="btn-negro-borde">QUIERO VENDER</a>
+  </div>
+</section>
+{% endblock %}

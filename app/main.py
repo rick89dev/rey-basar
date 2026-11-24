@@ -137,6 +137,11 @@ def terminos(request: Request):
     return render(request, "legal/terminos.html")
 
 
+@app.get("/sobre-nosotros", response_class=HTMLResponse)
+def sobre_nosotros(request: Request):
+    return render(request, "sobre.html")
+
+
 @app.get("/preguntas-frecuentes", response_class=HTMLResponse)
 def faq(request: Request):
     return render(request, "faq.html")
