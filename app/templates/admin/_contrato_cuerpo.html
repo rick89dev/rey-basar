@@ -18,10 +18,10 @@ con teléfono {% if blanco %}____________________ y domicilio en _______________
 
 <h2>Artículos</h2>
 <table class="art">
-  <tr><th>#</th><th>Descripción</th><th>Estado</th><th>Precio de venta</th><th>{{ 'Precio pagado' if c.modalidad == 'compra' else 'Recibe al venderse' }}</th></tr>
-  {% if blanco %}{% for i in range(1, 9) %}<tr class="fila-blanca"><td>{{ i }}</td><td>&nbsp;</td><td>&nbsp;</td><td class="n">$</td><td class="n">$</td></tr>{% endfor %}{% endif %}
+  <tr><th width="5%" class="num">#</th><th width="45%">Descripción</th><th width="18%">Estado</th><th width="16%">Precio de venta</th><th width="16%">{{ 'Precio pagado' if c.modalidad == 'compra' else 'Recibe al venderse' }}</th></tr>
+  {% if blanco %}{% for i in range(1, 9) %}<tr class="fila-blanca"><td class="num">{{ i }}</td><td>&nbsp;</td><td>&nbsp;</td><td class="n">$</td><td class="n">$</td></tr>{% endfor %}{% endif %}
   {% for p in c.piezas %}
-  <tr><td>{{ loop.index }}</td><td>{{ p.descripcion }}</td><td>{{ p.estado }}</td>
+  <tr><td class="num">{{ loop.index }}</td><td>{{ p.descripcion }}</td><td>{{ p.estado }}</td>
     <td class="n">{{ ('$' ~ '{:,}'.format(p.precio_venta)) if p.precio_venta is not none else '' }}</td>
     <td class="n">{{ ('$' ~ '{:,}'.format(p.pago_vendedor)) if p.pago_vendedor is not none else '' }}</td></tr>
   {% endfor %}
