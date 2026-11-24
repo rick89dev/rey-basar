@@ -37,7 +37,7 @@ def _startup():
 # ---------------------------------------------------------------- tienda
 BANNERS = [
     {"img": "inicio", "url": "/nuevos", "alt": "Piezas únicas a precio de rey: ropa y juguetes nuevos y seminuevos"},
-    {"img": "familia", "url": "/categoria/dama", "alt": "Dama, caballero, niños y juguetes"},
+    {"img": "familia", "url": "/categoria/ropa", "alt": "Dama, caballero, niños y juguetes"},
     {"img": "envio", "url": "/preguntas-frecuentes#envios", "alt": "Entregas en Cuernavaca: acordamos contigo el punto"},
 ]
 
@@ -71,7 +71,9 @@ def inicio(request: Request, db=Depends(get_db)):
 @app.get("/categoria/{clave}/{sub}", response_class=HTMLResponse)
 def categoria(request: Request, clave: str, sub: str = "", condicion: str = "", orden: str = "nuevos",
               db=Depends(get_db)):
-    from .config import SUBCATEGORIAS
+    from .config import CATEGORIAS_ANTERIORES, SUBCATEGORIAS
+    if clave in CATEGORIAS_ANTERIORES:   # enlaces viejos: /categoria/dama → /categoria/ropa/dama
+        return RedirectResponse(f"/categoria/{CATEGORIAS_ANTERIORES[clave]}/{clave}", 301)
     if clave not in CATEGORIA_NOMBRE:
         raise HTTPException(404)
     subs = SUBCATEGORIAS.get(clave, [])
@@ -192,6 +194,7 @@ def _entero(v, minimo: int | None = None) -> int | None:
 
 def _campos(nombre, categoria, condicion, talla, marca, descripcion, precio, precio_antes, costo,
             piezas, origen, vendedor, destacado, visible, subcategoria="") -> dict:
+    categoria, subcategoria = catalogo.normalizar_categoria(categoria, subcategoria)
     return dict(nombre=nombre.strip(), categoria=categoria,
                 subcategoria=catalogo.subcategoria_valida(categoria, subcategoria),
                 condicion=condicion, talla=talla.strip(),
@@ -372,6 +375,7 @@ async def api_crear(nombre: str = Form(...), categoria: str = Form(...), precio:
                     autor: str = Form(""), nota: str = Form(""), piezas: int = Form(1),
                     subcategoria: str = Form(""),
                     fotos: list[UploadFile] = File(default=[]), db=Depends(get_db)):
+    categoria, subcategoria = catalogo.normalizar_categoria(categoria, subcategoria)
     if categoria not in CATEGORIA_NOMBRE:
         categoria = "otros"
     if condicion not in ("nuevo", "usado"):

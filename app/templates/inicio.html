@@ -24,7 +24,7 @@
 <section class="mosaico">
   {% set tiles = [('juguetes','Juguetes','a'),('caballero','Caballero','b'),('dama','Dama','c'),('ninos','Niños','d'),('ninas','Niñas','e')] %}
   {% for clave, nombre, area in tiles %}
-  <a href="/categoria/{{ clave }}" class="tile tile-{{ area }}">
+  <a href="/categoria/{{ ('ropa/' ~ clave) if clave in SUBCATEGORIAS.ropa|map('first')|list else clave }}" class="tile tile-{{ area }}">
     <img src="{{ foto_categoria(clave, 640 if area == 'c' else 520) }}" alt="" loading="lazy" width="800" height="420" onerror="this.onerror=null;this.src='/static/img/categorias/{{ clave }}.webp'">
     <span class="etq">{{ nombre|upper }}</span>
   </a>

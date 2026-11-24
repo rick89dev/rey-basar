@@ -48,6 +48,15 @@ def guardar_imagen(datos: bytes) -> str:
     return nombre
 
 
+def normalizar_categoria(categoria: str, sub: str | None = "") -> tuple[str, str]:
+    """Acepta las claves viejas (dama, caballero, ninas, ninos) y las pasa a Ropa → subcategoría."""
+    from .config import CATEGORIAS_ANTERIORES
+    categoria = (categoria or "").strip().lower()
+    if categoria in CATEGORIAS_ANTERIORES:
+        return CATEGORIAS_ANTERIORES[categoria], categoria
+    return categoria, (sub or "")
+
+
 def subcategoria_valida(categoria: str, sub: str | None) -> str:
     from .config import SUBCATEGORIAS
     return sub if sub and sub in dict(SUBCATEGORIAS.get(categoria, [])) else ""
@@ -55,6 +64,7 @@ def subcategoria_valida(categoria: str, sub: str | None) -> str:
 
 def crear(db: Session, *, nombre: str, categoria: str, precio: int, fotos: list[bytes] = (),
           **campos) -> Producto:
+    categoria, campos["subcategoria"] = normalizar_categoria(categoria, campos.get("subcategoria"))
     if categoria not in CATEGORIA_NOMBRE:
         raise ValueError(f"Categoría inválida: {categoria}")
     campos["subcategoria"] = subcategoria_valida(categoria, campos.get("subcategoria"))

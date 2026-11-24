@@ -49,7 +49,7 @@
   </div>
   <label class="ancho">Nombre<input name="nombre" required value="{{ p.nombre if p else '' }}" placeholder="Ej. Chamarra de mezclilla Levi's"></label>
   <label>Categoría<select name="categoria">{% for k, n in CATEGORIAS %}<option value="{{ k }}" {{ 'selected' if p and p.categoria == k }}>{{ n }}</option>{% endfor %}</select></label>
-  <label id="campoSub">Para<select name="subcategoria" id="fSub"><option value="">—</option>{% for k, n in SUBCATEGORIAS.deportes %}<option value="{{ k }}" {{ 'selected' if p and p.subcategoria == k }}>{{ n }}</option>{% endfor %}</select></label>
+  <label id="campoSub">Subcategoría<select name="subcategoria" id="fSub" data-actual="{{ p.subcategoria if p else '' }}"><option value="">—</option></select></label>
   <label>Estado<select name="condicion">{% for k, n in cfg.CONDICIONES %}<option value="{{ k }}" {{ 'selected' if p and p.condicion == k }}>{{ n if k == 'nuevo' else 'Seminuevo' }}</option>{% endfor %}</select></label>
   <label>Talla<input name="talla" value="{{ p.talla if p else '' }}" placeholder="M, 10, 25 MX…"></label>
   <label>Marca<input name="marca" value="{{ p.marca if p else '' }}"></label>
@@ -110,7 +110,12 @@ function calc(){
 }
 ['origen','fCosto','fPrecio','fPiezas'].forEach(i=>$(i).addEventListener('input',calc));calc();
 const fCat=document.querySelector('[name=categoria]'), SUBS={{ SUBCATEGORIAS|tojson }};
-function subcat(){ const tiene=!!SUBS[fCat.value]; $('campoSub').style.display=tiene?'':'none'; if(!tiene) $('fSub').value=''; }
+function subcat(){
+  const lista=SUBS[fCat.value]||[], sel=$('fSub'), antes=sel.value||sel.dataset.actual||'';
+  sel.innerHTML='<option value="">—</option>'+lista.map(([k,n])=>`<option value="${k}">${n}</option>`).join('');
+  sel.value=lista.some(([k])=>k===antes)?antes:''; sel.dataset.actual='';
+  $('campoSub').style.display=lista.length?'':'none';
+}
 fCat.addEventListener('change',subcat); subcat();
 
 // ── Llenar con IA ──

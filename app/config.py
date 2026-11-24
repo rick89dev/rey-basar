@@ -50,20 +50,22 @@ INE_DESDE = int(os.getenv("REYBASAR_INE_DESDE", "1000"))
 PRIVADO_DIR = Path(os.getenv("REYBASAR_PRIVADO_DIR", BASE_DIR / "privado"))
 
 CATEGORIAS = [
-    ("dama", "Dama"),
-    ("caballero", "Caballero"),
-    ("ninas", "Niñas"),
-    ("ninos", "Niños"),
+    ("ropa", "Ropa"),
     ("juguetes", "Juguetes"),
-    ("electronicos", "Electrónicos"),
     ("deportes", "Deportes"),
+    ("alberca", "Alberca y verano"),
+    ("electronicos", "Electrónicos"),
     ("otros", "Otros"),
     ("demo", "Demo"),  # solo aparece en el menú si tiene productos
 ]
 CATEGORIA_NOMBRE = dict(CATEGORIAS)
 # Categorías con submenú
 SUBCATEGORIAS = {
-    "deportes": [("ninos", "Niños"), ("ninas", "Niñas"), ("hombre", "Hombre"), ("mujer", "Mujer")],
+    "ropa": [("dama", "Dama"), ("caballero", "Caballero"), ("ninas", "Niñas"), ("ninos", "Niños")],
+    "deportes": [("hombre", "Hombre"), ("mujer", "Mujer"), ("ninos", "Niños"), ("ninas", "Niñas"),
+                 ("equipo", "Equipo y ejercicio")],
 }
+# Categorías que antes eran principales (nov 2026): hoy son subcategorías de Ropa.
+CATEGORIAS_ANTERIORES = {"dama": "ropa", "caballero": "ropa", "ninas": "ropa", "ninos": "ropa"}
 CONDICIONES = [("nuevo", "Nuevo"), ("usado", "Usado")]
 ORIGENES = [("propio", "Propio"), ("consigna", "Consignación")]

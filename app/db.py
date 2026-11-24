@@ -351,6 +351,15 @@ class PedidoItem(Base):
 def init_db() -> None:
     Base.metadata.create_all(engine)
     _agregar_columnas_faltantes()
+    _mover_ropa_a_subcategorias()
+
+
+def _mover_ropa_a_subcategorias() -> None:
+    """Nov 2026: Dama, Caballero, Niñas y Niños pasan a ser subcategorías de Ropa (idempotente)."""
+    from sqlalchemy import text
+    with engine.begin() as con:
+        con.execute(text("UPDATE productos SET subcategoria = categoria, categoria = 'ropa' "
+                         "WHERE categoria IN ('dama', 'caballero', 'ninas', 'ninos')"))
 
 
 def _agregar_columnas_faltantes() -> None:
