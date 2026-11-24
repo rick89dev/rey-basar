@@ -4,7 +4,7 @@
 <h1>{% if c %}Contrato {{ c.folio }} {% if c.firmado %}<span class="estado pagado">Firmado</span>{% else %}<span class="estado sinpago">Sin firmar</span>{% endif %}{% else %}Nuevo contrato{% endif %}</h1>
 {% set err = error or request.query_params.get('error') %}
 {% if err %}<p class="error">{{ err }}</p>{% endif %}
-{% if ok == 'guardado' %}<p class="ok">Contrato guardado ✓</p>{% elif ok == 'ine' %}<p class="ok">Copia de INE guardada de forma privada ✓</p>{% elif ok == 'firmado' %}<p class="ok">Contrato marcado como firmado ✓</p>{% endif %}
+{% if ok == 'guardado' %}<p class="ok">Contrato guardado ✓</p>{% elif ok == 'ine' %}<p class="ok">Copia de INE guardada de forma privada ✓</p>{% elif ok == 'firmado' %}<p class="ok">Contrato firmado ✓ El PDF firmado quedó guardado.</p>{% endif %}
 
 {% set bloqueado = c and c.firmado %}
 <form method="post" action="/admin/contratos/guardar" class="ad-form contrato-form">
@@ -57,17 +57,57 @@
   <small>Se guarda fuera de la parte pública del sitio; solo los administradores pueden verla.</small>
   {% endif %}
 
-  <h2>2. Imprimir y firmar</h2>
-  <p><a href="/admin/contratos/{{ c.id }}/imprimir" target="_blank" class="btn-negro-borde">🖨️ VER / IMPRIMIR CONTRATO</a></p>
+  <h2>2. Vista previa</h2>
+  <p><small>Así queda el contrato con los datos y piezas de arriba. Revísalo con el vendedor antes de firmar.</small></p>
+  <iframe class="contrato-preview" src="/admin/contratos/{{ c.id }}/imprimir?embed=1" title="Vista previa del contrato" loading="lazy"></iframe>
+  <p class="botones-fila">
+    <a href="/admin/contratos/{{ c.id }}/pdf" target="_blank" class="btn-negro-borde">⬇ {{ 'DESCARGAR PDF FIRMADO' if c.firmado else 'DESCARGAR PDF PARA IMPRIMIR' }}</a>
+    <a href="/admin/contratos/{{ c.id }}/imprimir" target="_blank" class="subraya">Abrir en pantalla completa</a>
+  </p>
+
+  <h2>3. Firma {% if c.firmado %}<span class="tag verde-tag">LISTO</span>{% endif %}</h2>
   {% if c.firmado %}
-    <p>Firmado el {{ c.fecha_firma.strftime('%d/%m/%Y') }}.</p>
-    <form method="post" action="/admin/contratos/{{ c.id }}/quitar-firma" onsubmit="return confirm('¿Quitar la firma para editar el contrato?')"><button class="mini">Quitar firma (para corregir)</button></form>
+    <div class="firma-ok">
+      <p>✓ Firmado el <b>{{ c.fecha_firma.strftime('%d/%m/%Y a las %H:%M') }}</b>
+        {% if c.firmado_metodo == 'pantalla' %}en pantalla (las firmas van dentro del PDF).{% elif c.firmado_metodo == 'papel' %}en papel.{% else %}.{% endif %}</p>
+      <p class="botones-fila">
+        <a href="/admin/contratos/{{ c.id }}/pdf" target="_blank" class="btn-negro">⬇ PDF FIRMADO</a>
+        {% if c.archivo_firmado %}<a href="/admin/contratos/{{ c.id }}/firmado" target="_blank" class="btn-negro-borde">📷 VER CONTRATO FIRMADO EN PAPEL</a>{% endif %}
+      </p>
+      <small>Guárdalo: es tu comprobante de que el vendedor te entregó las piezas y declaró que son suyas.</small>
+      <form method="post" action="/admin/contratos/{{ c.id }}/quitar-firma" onsubmit="return confirm('Se borrarán las firmas y el PDF firmado y habrá que volver a firmar. ¿Continuar?')"><button class="mini">Quitar firma (para corregir un error)</button></form>
+    </div>
   {% else %}
-    <form method="post" action="/admin/contratos/{{ c.id }}/firmar"><button class="btn-negro">✓ MARCAR COMO FIRMADO</button></form>
+    <p><small>Imprime el PDF en dos tantos (uno para cada quien), fírmenlos y sube la foto del tuyo. Sin esa prueba el contrato no se puede marcar como firmado.</small></p>
+    <div class="firma-opciones">
+      <details class="firma-op" open>
+        <summary><b>A. Firmado en papel</b> <small>(lo normal: imprime el PDF, que firmen los dos y súbele foto)</small></summary>
+        <form method="post" action="/admin/contratos/{{ c.id }}/firmado-papel" enctype="multipart/form-data" class="form-venta">
+          <label class="crece">Foto o PDF del contrato firmado (todas las hojas)<input type="file" name="archivo" accept="image/*,application/pdf" capture="environment" required></label>
+          <button class="btn-negro">SUBIR CONTRATO FIRMADO</button>
+        </form>
+        <small>Si son varias hojas, escanéalas en un solo PDF (por ejemplo con la app Notas o Google Drive).</small>
+      </details>
+      <details class="firma-op">
+        <summary><b>B. Opcional: firmar en pantalla</b> <small>(celular o tablet, con el dedo)</small></summary>
+        <form method="post" action="/admin/contratos/{{ c.id }}/firmar-pantalla" id="formFirma">
+          <div class="pad-caja"><span>Firma del vendedor: <b>{{ c.nombre }}</b></span>
+            <canvas class="pad" data-campo="firma_vendedor" aria-label="Área de firma del vendedor"></canvas>
+            <button type="button" class="mini limpiar">Limpiar</button></div>
+          <div class="pad-caja"><span>Firma de ReyBasar (quien recibe)</span>
+            <canvas class="pad" data-campo="firma_tienda" aria-label="Área de firma de la tienda"></canvas>
+            <button type="button" class="mini limpiar">Limpiar</button></div>
+          <input type="hidden" name="firma_vendedor"><input type="hidden" name="firma_tienda">
+          <label class="check"><input type="checkbox" name="acepto" value="1" required> El vendedor leyó el contrato y acepta lo que dice.</label>
+          <button class="btn-negro">✍️ FIRMAR Y GUARDAR PDF</button>
+          <p class="neg" id="firmaError" hidden></p>
+        </form>
+      </details>
+    </div>
   {% endif %}
 
   {% if c.piezas %}
-  <h2>3. Publicar las piezas</h2>
+  <h2>4. Publicar las piezas</h2>
   <p><small>Crea el producto de cada pieza (queda oculto para que le subas fotos con IA y lo publiques).{% if c.modalidad == 'compra' %} El pago al vendedor se registra como lo que pagaste (tu inversión).{% else %} Queda como consignación de {{ c.nombre }}.{% endif %}</small></p>
   <ul class="vf-lista">
     {% for p in c.piezas %}
@@ -110,5 +150,28 @@ document.getElementById('agregarPieza').onclick=nueva;
 caja.addEventListener('input',totales); mod.addEventListener('change',totales);
 caja.addEventListener('click',e=>{ if(e.target.classList.contains('quitar')){ e.target.closest('.pieza-fila').remove(); totales(); }});
 if(!caja.children.length) nueva(); totales();
+</script>
+<script>
+(function(){
+  const form=document.getElementById('formFirma'); if(!form) return;
+  const pads=[...form.querySelectorAll('canvas.pad')].map(cv=>{
+    const ctx=cv.getContext('2d'); let dib=false, usado=false, ult=null;
+    function tam(){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1, img=usado?cv.toDataURL():null;
+      cv.width=r.width*d; cv.height=r.height*d; ctx.setTransform(d,0,0,d,0,0); ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111';
+      if(img){ const i=new Image(); i.onload=()=>ctx.drawImage(i,0,0,r.width,r.height); i.src=img; } }
+    const pos=e=>{ const r=cv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; };
+    cv.addEventListener('pointerdown',e=>{ e.preventDefault(); cv.setPointerCapture(e.pointerId); dib=true; ult=pos(e); ctx.beginPath(); ctx.arc(ult[0],ult[1],1.1,0,7); ctx.fillStyle='#111'; ctx.fill(); usado=true; });
+    cv.addEventListener('pointermove',e=>{ if(!dib) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(...ult); ctx.lineTo(...p); ctx.stroke(); ult=p; });
+    ['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>dib=false));
+    cv.parentNode.querySelector('.limpiar').onclick=()=>{ ctx.clearRect(0,0,cv.width,cv.height); usado=false; };
+    tam(); window.addEventListener('resize',tam);
+    return {cv, usado:()=>usado};
+  });
+  form.addEventListener('submit',e=>{
+    const err=document.getElementById('firmaError');
+    if(pads.some(p=>!p.usado())){ e.preventDefault(); err.textContent='Faltan firmas: deben firmar el vendedor y ReyBasar.'; err.hidden=false; return; }
+    pads.forEach(p=>form.querySelector(`[name=${p.cv.dataset.campo}]`).value=p.cv.toDataURL('image/png'));
+  });
+})();
 </script>
 {% endblock %}

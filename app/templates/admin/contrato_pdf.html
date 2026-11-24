@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+  @page{size:letter;margin:14mm 16mm 16mm 16mm;
+    @frame pie{-pdf-frame-content:pie;bottom:8mm;margin-left:16mm;margin-right:16mm;height:8mm}}
+  body{font-family:Times-Roman;color:#111;font-size:12.5px;line-height:1.38}
+  h1{font-size:18px;text-align:center;text-transform:uppercase;margin:0 0 4px;letter-spacing:.04em}
+  .sub{text-align:center;margin:0 0 12px;color:#333}
+  h2{font-size:13px;text-transform:uppercase;margin:12px 0 4px;-pdf-keep-with-next:true}
+  table.art{width:100%;border-collapse:collapse;margin:8px 0}
+  table.art th,table.art td{border:1px solid #444;padding:3px 6px;text-align:left;vertical-align:top}
+  table.art th{background:#eee}
+  td.n{text-align:right;white-space:nowrap}
+  .linea{border-bottom:1px solid #000}
+  table.firmas-t{width:100%;margin-top:12px;-pdf-keep-in-frame-mode:shrink;border-collapse:collapse}
+  .firma-esp{height:60px;vertical-align:bottom;text-align:center;border-bottom:1px solid #000;width:45%}
+  .firma-nom{text-align:center;padding-top:6px;width:45%}
+  .sep{width:10%}
+  .firma-img{max-height:75px;max-width:260px}
+  .sello-firma{font-size:10px;color:#444;text-align:center;margin-top:6px}
+  #pie{font-size:9px;color:#666;text-align:center}
+  table.lugar-fecha{width:100%;margin:0 0 14px;border-collapse:collapse}
+  table.lugar-fecha td{padding:0}
+  table.lugar-fecha td.der{text-align:right}
+  tr.fila-blanca td{height:22px}
+  p.renglones{line-height:2.2}
+</style></head>
+<body>
+{% include "admin/_contrato_cuerpo.html" %}
+<div id="pie">ReyBasar · Contrato {% if blanco %}{{ 'de compraventa' if c.modalidad == 'compra' else 'de consignación' }}{% else %}{{ c.folio }}{% endif %} · Página <pdf:pagenumber> de <pdf:pagecount></div>
+</body></html>

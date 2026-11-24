@@ -640,3 +640,21 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
   .pieza-fila input[name=descripcion]{grid-column:1/-1}
   .pieza-fila .quitar{justify-self:end;grid-column:2}
 }
+.contrato-preview{width:100%;height:520px;border:1px solid #ddd;border-radius:8px;background:#fff}
+.botones-fila{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:10px 0}
+.verde-tag{background:#11823f;color:#fff}
+.firma-ok{border:1px solid #11823f;border-radius:8px;padding:12px 14px;background:#f2faf5}
+.firma-opciones{display:grid;gap:10px}
+.firma-op{border:1px solid #ddd;border-radius:8px;padding:10px 14px;background:#fff}
+.firma-op summary{cursor:pointer;padding:4px 0;min-height:24px}
+.firma-op form{margin-top:10px;display:grid;gap:12px}
+.pad-caja{display:grid;gap:6px}
+.pad-caja span{font-size:14px}
+.pad{width:100%;height:160px;border:1px dashed #888;border-radius:8px;background:#fff;touch-action:none;cursor:crosshair}
+.pad-caja .limpiar{justify-self:start}
+.firma-op label.check{display:flex;flex-direction:row;gap:8px;align-items:flex-start;font-size:14px;font-weight:400}
+.firma-op label.check input{width:20px;height:20px;flex:none;margin:1px 0 0;padding:0}
+@media (max-width:640px){.contrato-preview{height:420px}.pad{height:150px}}
+.formato-blanco{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px dashed #bbb;border-radius:8px;padding:10px 14px;margin:0 0 16px;background:#fff}
+.formato-blanco .btn-negro-borde{padding:8px 16px;font-size:13px}
+.formato-blanco small{flex-basis:100%;color:#555}

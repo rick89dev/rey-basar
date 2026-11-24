@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %}
 {% block contenido %}
 <div class="res-cab"><h1>Contratos</h1><div class="res-acciones"><a href="/admin/contratos/nuevo" class="btn-negro">+ CONTRATO</a></div></div>
+<div class="formato-blanco"><span>🖨️ <b>Formato en blanco</b> para llenar a mano (cuando no tengas la compu):</span>
+  <a href="/admin/contratos/formato/compra" target="_blank" class="btn-negro-borde">COMPRAVENTA</a>
+  <a href="/admin/contratos/formato/consigna" target="_blank" class="btn-negro-borde">CONSIGNACIÓN</a>
+  <small>Imprime 2 tantos. Al regresar, captura el contrato aquí y sube la foto del firmado.</small></div>
 <p class="ad-ayuda">Cuando alguien te vende piezas o te las deja a consignación, registra aquí el contrato, imprímelo y fírmenlo. Piezas de {{ cfg.INE_DESDE|pesos }} o más requieren copia de INE.</p>
 {% if contratos %}
 <ul class="vf-lista res-bloque">

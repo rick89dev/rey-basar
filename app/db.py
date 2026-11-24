@@ -179,6 +179,12 @@ class Contrato(Base):
     notas: Mapped[str] = mapped_column(Text, default="")
     firmado: Mapped[bool] = mapped_column(Boolean, default=False)
     fecha_firma: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Prueba de firma (todo en PRIVADO_DIR): firmas dibujadas en pantalla o foto del contrato firmado en papel
+    firmado_metodo: Mapped[str] = mapped_column(String(10), default="")     # pantalla | papel
+    firma_vendedor: Mapped[str] = mapped_column(String(120), default="")
+    firma_tienda: Mapped[str] = mapped_column(String(120), default="")
+    archivo_firmado: Mapped[str] = mapped_column(String(120), default="")
+    pdf_final: Mapped[str] = mapped_column(String(120), default="")
     creado: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     piezas: Mapped[list["ContratoPieza"]] = relationship(back_populates="contrato", cascade="all, delete-orphan",

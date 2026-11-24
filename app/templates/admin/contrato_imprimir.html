@@ -6,76 +6,34 @@
 <meta name="robots" content="noindex">
 <style>
   @page{size:letter;margin:18mm 16mm}
-  body{font-family:Georgia,"Times New Roman",serif;color:#111;max-width:760px;margin:0 auto;padding:20px;font-size:13.5px;line-height:1.5}
+  body{max-width:760px;margin:0 auto;padding:20px}
+  body{font-family:Georgia,"Times New Roman",serif;color:#111;font-size:13.5px;line-height:1.5}
   h1{font-size:18px;text-align:center;text-transform:uppercase;margin:0 0 4px;letter-spacing:.04em}
   .sub{text-align:center;margin:0 0 18px;color:#333}
   h2{font-size:14px;text-transform:uppercase;margin:16px 0 6px}
-  table{width:100%;border-collapse:collapse;margin:8px 0}
-  th,td{border:1px solid #444;padding:5px 7px;text-align:left;vertical-align:top}
-  th{background:#eee}
+  table.art{width:100%;border-collapse:collapse;margin:8px 0}
+  table.art th,table.art td{border:1px solid #444;padding:5px 7px;text-align:left;vertical-align:top}
+  table.art th{background:#eee}
   td.n{text-align:right;white-space:nowrap}
   .linea{display:inline-block;min-width:240px;border-bottom:1px solid #000}
-  .firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:50px;text-align:center}
-  .firmas div{border-top:1px solid #000;padding-top:6px}
-  .barra{position:sticky;top:0;background:#fff6dd;border:1px solid #f2b630;padding:8px 12px;margin-bottom:16px;font-family:system-ui,sans-serif;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .barra button{font:inherit;font-weight:700;padding:8px 18px;background:#000;color:#fff;border:0;cursor:pointer}
+  table.firmas-t{width:100%;margin-top:40px;border-collapse:collapse}
+  .firma-esp{height:80px;vertical-align:bottom;text-align:center;border-bottom:1px solid #000;width:45%}
+  .firma-nom{text-align:center;padding-top:6px;width:45%}
+  .sep{width:10%}
+  .firma-img{max-height:75px;max-width:260px}
+  .sello-firma{font-size:11px;color:#444;text-align:center;margin-top:14px}
+  .barra{position:sticky;top:0;background:#fff6dd;border:1px solid #f2b630;padding:8px 12px;margin-bottom:16px;font-family:system-ui,sans-serif;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .barra a{font-weight:700;padding:8px 18px;background:#000;color:#fff;text-decoration:none}
   .aviso{font-size:12px;color:#444;border-top:1px solid #ccc;margin-top:20px;padding-top:8px}
   @media print{.barra,.aviso{display:none}body{padding:0}}
+  table.lugar-fecha{width:100%;margin:0 0 14px;border-collapse:collapse}
+  table.lugar-fecha td{padding:0}
+  table.lugar-fecha td.der{text-align:right}
 </style>
 </head>
 <body>
-<div class="barra"><span>Revisa los datos, imprime 2 copias (una para cada parte) y fírmenlas.</span><button onclick="print()">🖨️ Imprimir</button></div>
-
-<h1>{% if c.modalidad == 'compra' %}Contrato de compraventa de artículos usados{% else %}Contrato de consignación de artículos{% endif %}</h1>
-<p class="sub">Folio {{ c.folio }} · Cuernavaca, Morelos, a {{ (c.fecha_firma or hoy).strftime('%d/%m/%Y') }}</p>
-
-<p>Celebran el presente contrato, por una parte, <b>ReyBasar</b> (en adelante, “LA TIENDA”) y, por la otra,
-<b>{{ c.nombre }}</b> (en adelante, “{{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }}”),
-{% if c.ine_clave %}quien se identifica con credencial para votar con clave/folio <b>{{ c.ine_clave }}</b>,{% else %}quien se identifica con credencial para votar <span class="linea"></span>,{% endif %}
-con teléfono {{ c.telefono or '_______________' }}{% if c.domicilio %} y domicilio en {{ c.domicilio }}{% endif %}, al tenor de las siguientes:</p>
-
-<h2>Declaraciones</h2>
-<p>{{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }} declara, bajo protesta de decir verdad:</p>
-<ol type="a">
-  <li>Que es el <b>único y legítimo propietario</b> de los artículos descritos en este contrato y que tiene pleno derecho para {{ 'venderlos' if c.modalidad == 'compra' else 'entregarlos en consignación' }}.</li>
-  <li>Que los artículos fueron <b>adquiridos de manera lícita</b>, no son producto de robo ni de ningún otro delito, y no tienen reporte, gravamen ni reclamación de terceros.</li>
-  <li>Que los datos e identificación que proporciona son verdaderos.</li>
-</ol>
-
-<h2>Artículos</h2>
-<table>
-  <tr><th>#</th><th>Descripción</th><th>Estado</th><th>Precio de venta</th><th>{{ 'Precio pagado' if c.modalidad == 'compra' else 'Recibe al venderse' }}</th></tr>
-  {% for p in c.piezas %}
-  <tr><td>{{ loop.index }}</td><td>{{ p.descripcion }}</td><td>{{ p.estado }}</td>
-    <td class="n">{{ ('$' ~ '{:,}'.format(p.precio_venta)) if p.precio_venta is not none else '' }}</td>
-    <td class="n">{{ ('$' ~ '{:,}'.format(p.pago_vendedor)) if p.pago_vendedor is not none else '' }}</td></tr>
-  {% endfor %}
-  <tr><th colspan="3" style="text-align:right">Total</th><th class="n">${{ '{:,}'.format(c.total_venta) }}</th><th class="n">${{ '{:,}'.format(c.total_vendedor) }}</th></tr>
-</table>
-
-<h2>Cláusulas</h2>
-<ol>
-{% if c.modalidad == 'compra' %}
-  <li><b>Objeto.</b> EL VENDEDOR vende a LA TIENDA los artículos descritos, quien los recibe después de revisar su estado.</li>
-  <li><b>Precio.</b> LA TIENDA paga a EL VENDEDOR la cantidad total de <b>${{ '{:,}'.format(c.total_vendedor) }}</b>, que EL VENDEDOR recibe a su entera satisfacción al firmar este contrato. A partir de ese momento la propiedad de los artículos pasa a LA TIENDA.</li>
-{% else %}
-  <li><b>Objeto.</b> EL CONSIGNANTE entrega a LA TIENDA los artículos descritos para que los ofrezca a la venta. Los artículos siguen siendo propiedad de EL CONSIGNANTE hasta que se vendan.</li>
-  <li><b>Precio y pago.</b> LA TIENDA ofrecerá cada artículo al precio de venta indicado. Cuando un artículo se venda, LA TIENDA pagará a EL CONSIGNANTE la cantidad acordada en la columna “Recibe al venderse”, dentro de los <b>{{ c.dias_pago }} días</b> naturales siguientes a la venta. Cualquier cambio de precio se acordará entre ambas partes.</li>
-  <li><b>Plazo.</b> Los artículos estarán en exhibición hasta <b>{{ c.dias_exhibicion }} días</b> naturales a partir de la firma. Al terminar el plazo, EL CONSIGNANTE podrá recoger los artículos no vendidos o acordar por escrito un nuevo plazo. Si no los recoge dentro de los 30 días siguientes al aviso de LA TIENDA, las partes acordarán su destino.</li>
-  <li><b>Cuidado.</b> LA TIENDA cuidará los artículos con diligencia; no responde por el desgaste normal derivado de su exhibición.</li>
-{% endif %}
-  <li><b>Responsabilidad por la procedencia.</b> {{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }} responde frente a LA TIENDA, a terceros y a cualquier autoridad por la propiedad y procedencia de los artículos. Si se demostrara que algún artículo es de procedencia ilícita o pertenece a otra persona, LA TIENDA podrá entregarlo a la autoridad o a su legítimo dueño, y {{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }} deberá {{ 'devolver lo que recibió por él y ' if c.modalidad == 'compra' else '' }}cubrir los daños y perjuicios que se causen, liberando a LA TIENDA de toda responsabilidad.</li>
-  <li><b>Identificación.</b> {% if requiere_ine %}Por tratarse de artículos de valor alto, {{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }} entrega copia de su credencial para votar, que forma parte de este contrato.{% else %}LA TIENDA podrá solicitar copia de identificación oficial.{% endif %}</li>
-  <li><b>Datos personales.</b> Los datos de {{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }} se tratan conforme al Aviso de privacidad publicado en reybasar.mx/aviso-de-privacidad, solo para formalizar y dar seguimiento a este contrato.</li>
-  <li><b>Jurisdicción.</b> Para la interpretación y cumplimiento de este contrato, las partes se someten a las leyes y tribunales de Cuernavaca, Morelos.</li>
-</ol>
-{% if c.notas %}<h2>Condiciones adicionales</h2><p>{{ c.notas }}</p>{% endif %}
-
-<p>Leído el presente contrato y enteradas las partes de su contenido y alcance, lo firman por duplicado.</p>
-<div class="firmas">
-  <div><b>{{ c.nombre }}</b><br>{{ 'EL VENDEDOR' if c.modalidad == 'compra' else 'EL CONSIGNANTE' }}</div>
-  <div><b>ReyBasar</b><br>LA TIENDA</div>
-</div>
+{% if not embed %}<div class="barra"><span>{% if c.firmado %}Contrato firmado.{% else %}Vista previa: revisa los datos antes de firmar.{% endif %}</span><a href="/admin/contratos/{{ c.id }}/pdf">⬇ Descargar PDF</a></div>{% endif %}
+{% include "admin/_contrato_cuerpo.html" %}
 <p class="aviso">Formato de referencia. Te recomendamos que un abogado lo revise antes de usarlo de forma definitiva.</p>
 </body>
 </html>
