@@ -1,0 +1,114 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<a href="/admin/contratos" class="volver">‹ Contratos</a>
+<h1>{% if c %}Contrato {{ c.folio }} {% if c.firmado %}<span class="estado pagado">Firmado</span>{% else %}<span class="estado sinpago">Sin firmar</span>{% endif %}{% else %}Nuevo contrato{% endif %}</h1>
+{% set err = error or request.query_params.get('error') %}
+{% if err %}<p class="error">{{ err }}</p>{% endif %}
+{% if ok == 'guardado' %}<p class="ok">Contrato guardado ✓</p>{% elif ok == 'ine' %}<p class="ok">Copia de INE guardada de forma privada ✓</p>{% elif ok == 'firmado' %}<p class="ok">Contrato marcado como firmado ✓</p>{% endif %}
+
+{% set bloqueado = c and c.firmado %}
+<form method="post" action="/admin/contratos/guardar" class="ad-form contrato-form">
+  {% if c %}<input type="hidden" name="cid" value="{{ c.id }}">{% endif %}
+  <fieldset class="ancho precios" {{ 'disabled' if bloqueado }}>
+    <legend>Vendedor</legend>
+    <label>Modalidad<select name="modalidad" id="fModalidad">{% for k, n in modalidades %}<option value="{{ k }}" {{ 'selected' if c and c.modalidad == k }}>{{ n }}</option>{% endfor %}</select></label>
+    <label>Nombre completo<input name="nombre" required value="{{ c.nombre if c else '' }}" placeholder="Como aparece en su INE"></label>
+    <label>Teléfono<input name="telefono" inputmode="tel" value="{{ c.telefono if c else '' }}"></label>
+    <label class="ancho2">Domicilio <small>(opcional)</small><input name="domicilio" value="{{ c.domicilio if c else '' }}"></label>
+    <label>Clave de elector / folio INE <small>(opcional)</small><input name="ine_clave" value="{{ c.ine_clave if c else '' }}"></label>
+    <label class="soloconsigna">Días en exhibición<input name="dias_exhibicion" type="number" min="1" value="{{ c.dias_exhibicion if c else 60 }}"></label>
+    <label class="soloconsigna">Pago al vendedor (días tras la venta)<input name="dias_pago" type="number" min="0" value="{{ c.dias_pago if c else 7 }}"></label>
+  </fieldset>
+
+  <fieldset class="ancho piezas-fs" {{ 'disabled' if bloqueado }}>
+    <legend>Piezas</legend>
+    <div class="piezas-cab"><span>Descripción</span><span>Estado</span><span>Precio de venta</span><span id="lblPago">Pago al vendedor</span><span></span></div>
+    <div id="piezas">
+      {% for p in (c.piezas if c else []) %}
+      <div class="pieza-fila">
+        <input type="hidden" name="pieza_id" value="{{ p.id }}">
+        <input name="descripcion" value="{{ p.descripcion }}" placeholder="Ej. Chamarra de piel negra talla M" aria-label="Descripción">
+        <input name="estado" value="{{ p.estado }}" placeholder="Buenas condiciones">
+        <input name="precio_venta" type="number" min="0" value="{{ p.precio_venta if p.precio_venta is not none else '' }}" class="pv" placeholder="Precio de venta" aria-label="Precio de venta">
+        <input name="pago_vendedor" type="number" min="0" value="{{ p.pago_vendedor if p.pago_vendedor is not none else '' }}" placeholder="Al vendedor" aria-label="Pago al vendedor">
+        <button type="button" class="mini rojo quitar" aria-label="Quitar pieza">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="mini" id="agregarPieza">+ Agregar pieza</button>
+    <p class="calc-margen" id="totales"></p>
+  </fieldset>
+  <label class="ancho">Notas <small>(condiciones especiales)</small><textarea name="notas" rows="2" {{ 'disabled' if bloqueado }}>{{ c.notas if c else '' }}</textarea></label>
+  {% if not bloqueado %}<button class="btn-negro">GUARDAR CONTRATO</button>{% endif %}
+</form>
+
+{% if c %}
+<section class="res-bloque contrato-acciones">
+  <h2>1. Copia de INE {% if c.requiere_ine(cfg.INE_DESDE) %}<span class="tag rojo-tag">OBLIGATORIA</span>{% else %}<small>(opcional)</small>{% endif %}</h2>
+  {% if c.requiere_ine(cfg.INE_DESDE) %}<p>Hay piezas de {{ cfg.INE_DESDE|pesos }} o más: necesitas la copia de la INE para poder firmar.</p>{% endif %}
+  {% if c.ine_archivo %}
+    <p>✓ INE guardada de forma privada. <a href="/admin/contratos/{{ c.id }}/ine" target="_blank" class="subraya">Ver INE</a></p>
+    {% if not c.firmado %}<form method="post" action="/admin/contratos/{{ c.id }}/ine/borrar" onsubmit="return confirm('¿Borrar la copia de INE?')"><button class="mini rojo">Borrar INE</button></form>{% endif %}
+  {% else %}
+  <form method="post" action="/admin/contratos/{{ c.id }}/ine" enctype="multipart/form-data" class="form-venta">
+    <label class="crece">Foto o PDF de la INE (frente y vuelta)<input type="file" name="archivo" accept="image/*,application/pdf" required></label>
+    <button class="btn-negro">SUBIR INE</button>
+  </form>
+  <small>Se guarda fuera de la parte pública del sitio; solo los administradores pueden verla.</small>
+  {% endif %}
+
+  <h2>2. Imprimir y firmar</h2>
+  <p><a href="/admin/contratos/{{ c.id }}/imprimir" target="_blank" class="btn-negro-borde">🖨️ VER / IMPRIMIR CONTRATO</a></p>
+  {% if c.firmado %}
+    <p>Firmado el {{ c.fecha_firma.strftime('%d/%m/%Y') }}.</p>
+    <form method="post" action="/admin/contratos/{{ c.id }}/quitar-firma" onsubmit="return confirm('¿Quitar la firma para editar el contrato?')"><button class="mini">Quitar firma (para corregir)</button></form>
+  {% else %}
+    <form method="post" action="/admin/contratos/{{ c.id }}/firmar"><button class="btn-negro">✓ MARCAR COMO FIRMADO</button></form>
+  {% endif %}
+
+  {% if c.piezas %}
+  <h2>3. Publicar las piezas</h2>
+  <p><small>Crea el producto de cada pieza (queda oculto para que le subas fotos con IA y lo publiques).{% if c.modalidad == 'compra' %} El pago al vendedor se registra como lo que pagaste (tu inversión).{% else %} Queda como consignación de {{ c.nombre }}.{% endif %}</small></p>
+  <ul class="vf-lista">
+    {% for p in c.piezas %}
+    <li class="vf"><div class="vf-info"><b>{{ p.descripcion }}</b><br><small>{{ p.estado }}</small></div>
+      <div class="vf-num"><b>{{ p.precio_venta|pesos if p.precio_venta else '—' }}</b><small>al vendedor: {{ p.pago_vendedor|pesos if p.pago_vendedor is not none else '—' }}</small></div>
+      <div class="vf-acc">{% if p.producto_id %}<a href="/admin/producto/{{ p.producto_id }}" class="mini">Ver producto RB-{{ '%04d'|format(p.producto_id) }}</a>
+        {% else %}<form method="post" action="/admin/contratos/{{ c.id }}/pieza/{{ p.id }}/producto"><button class="mini">Crear producto</button></form>{% endif %}</div></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if not c.firmado %}
+  <form method="post" action="/admin/contratos/{{ c.id }}/borrar" onsubmit="return confirm('¿Borrar este contrato?')" class="ad-eliminar"><button class="mini rojo">Borrar contrato</button></form>
+  {% endif %}
+</section>
+{% endif %}
+
+<template id="tplPieza">
+  <div class="pieza-fila">
+    <input type="hidden" name="pieza_id" value="">
+    <input name="descripcion" placeholder="Ej. Chamarra de piel negra talla M" aria-label="Descripción">
+    <input name="estado" placeholder="Buenas condiciones">
+    <input name="precio_venta" type="number" min="0" class="pv" placeholder="Precio de venta" aria-label="Precio de venta">
+    <input name="pago_vendedor" type="number" min="0" placeholder="Al vendedor" aria-label="Pago al vendedor">
+    <button type="button" class="mini rojo quitar" aria-label="Quitar pieza">✕</button>
+  </div>
+</template>
+<script>
+const caja=document.getElementById('piezas'), tpl=document.getElementById('tplPieza'), mod=document.getElementById('fModalidad'), INE={{ cfg.INE_DESDE }};
+const pesos=n=>'$'+Math.round(n).toLocaleString('es-MX');
+function totales(){
+  let v=0,g=0,alto=0; caja.querySelectorAll('.pieza-fila').forEach(f=>{const pv=+f.querySelector('[name=precio_venta]').value||0,pg=+f.querySelector('[name=pago_vendedor]').value||0; v+=pv; g+=pg; if(pv>=INE) alto++; f.classList.toggle('alto',pv>=INE);});
+  const compra=mod.value==='compra';
+  document.getElementById('lblPago').textContent=compra?'Le pagas hoy':'Recibe al venderse';
+  document.querySelectorAll('.soloconsigna').forEach(e=>e.style.display=compra?'none':'');
+  document.getElementById('totales').innerHTML=`<span>Precio de venta total: <b>${pesos(v)}</b></span><span>${compra?'Le pagas hoy':'Recibe al venderse todo'}: <b>${pesos(g)}</b></span>`+(compra&&v?`<span>Equivale al <b>${Math.round(100*g/v)}%</b> del precio de venta (sugerido {{ cfg.COMPRA_PCT_MIN }}–{{ cfg.COMPRA_PCT_MAX }}%)</span>`:'')+(alto?`<span class="neg">⚠️ ${alto} pieza(s) de ${pesos(INE)} o más: requiere copia de INE</span>`:'');
+}
+function nueva(){ caja.appendChild(tpl.content.cloneNode(true)); totales(); }
+document.getElementById('agregarPieza').onclick=nueva;
+caja.addEventListener('input',totales); mod.addEventListener('change',totales);
+caja.addEventListener('click',e=>{ if(e.target.classList.contains('quitar')){ e.target.closest('.pieza-fila').remove(); totales(); }});
+if(!caja.children.length) nueva(); totales();
+</script>
+{% endblock %}

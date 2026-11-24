@@ -39,8 +39,19 @@ def foto_categoria(clave: str, ancho: int = 900) -> str:
             f"?w={ancho}&q=60&fit=crop&auto=format")
 
 
+def _version(nombre: str) -> str:
+    """Huella del archivo estático: cambia sola cuando cambia el archivo (rompe la caché del navegador)."""
+    import hashlib
+    try:
+        return hashlib.md5((APP_DIR / "static" / nombre).read_bytes()).hexdigest()[:8]
+    except OSError:
+        return "0"
+
+
+ASSET_V = {"css": _version("rb.css"), "js": _version("rb.js")}
+
 templates.env.filters["pesos"] = pesos
-templates.env.globals.update(cfg=config, CATEGORIAS=CATEGORIAS, SUBCATEGORIAS=SUBCATEGORIAS, quote=quote,
+templates.env.globals.update(ASSET_V=ASSET_V, cfg=config, CATEGORIAS=CATEGORIAS, SUBCATEGORIAS=SUBCATEGORIAS, quote=quote,
                              foto_categoria=foto_categoria, dict=dict)
 
 

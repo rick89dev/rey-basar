@@ -160,6 +160,65 @@ class Venta(Base):
         return (self.precio_unitario - self.costo_unitario) * self.cantidad
 
 
+MODALIDADES = [("consigna", "Consignación"), ("compra", "Compra directa")]
+
+
+class Contrato(Base):
+    """Contrato con quien nos vende o deja a consignación sus piezas."""
+    __tablename__ = "contratos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    modalidad: Mapped[str] = mapped_column(String(10), default="consigna")
+    nombre: Mapped[str] = mapped_column(String(150))
+    telefono: Mapped[str] = mapped_column(String(20), default="")
+    domicilio: Mapped[str] = mapped_column(String(250), default="")
+    ine_clave: Mapped[str] = mapped_column(String(30), default="")      # clave de elector / folio
+    ine_archivo: Mapped[str] = mapped_column(String(120), default="")   # en PRIVADO_DIR, nunca público
+    dias_exhibicion: Mapped[int] = mapped_column(Integer, default=60)
+    dias_pago: Mapped[int] = mapped_column(Integer, default=7)
+    notas: Mapped[str] = mapped_column(Text, default="")
+    firmado: Mapped[bool] = mapped_column(Boolean, default=False)
+    fecha_firma: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    creado: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+    piezas: Mapped[list["ContratoPieza"]] = relationship(back_populates="contrato", cascade="all, delete-orphan",
+                                                          order_by="ContratoPieza.id")
+
+    @property
+    def folio(self) -> str:
+        return f"C-{self.id:04d}"
+
+    @property
+    def modalidad_nombre(self) -> str:
+        return dict(MODALIDADES).get(self.modalidad, self.modalidad)
+
+    @property
+    def total_venta(self) -> int:
+        return sum(p.precio_venta or 0 for p in self.piezas)
+
+    @property
+    def total_vendedor(self) -> int:
+        return sum(p.pago_vendedor or 0 for p in self.piezas)
+
+    def requiere_ine(self, desde: int) -> bool:
+        return any((p.precio_venta or 0) >= desde for p in self.piezas)
+
+
+class ContratoPieza(Base):
+    __tablename__ = "contrato_piezas"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    contrato_id: Mapped[int] = mapped_column(ForeignKey("contratos.id", ondelete="CASCADE"))
+    descripcion: Mapped[str] = mapped_column(String(200))
+    estado: Mapped[str] = mapped_column(String(60), default="")          # buenas condiciones, detalle…
+    precio_venta: Mapped[int | None] = mapped_column(Integer, nullable=True)   # precio al que lo vendemos
+    pago_vendedor: Mapped[int | None] = mapped_column(Integer, nullable=True)  # lo que recibe el vendedor
+    producto_id: Mapped[int | None] = mapped_column(ForeignKey("productos.id", ondelete="SET NULL"), nullable=True)
+
+    contrato: Mapped[Contrato] = relationship(back_populates="piezas")
+    producto: Mapped["Producto | None"] = relationship()
+
+
 CATEGORIAS_GASTO = [
     ("servidor", "Servidor y dominio"),
     ("software", "Software y licencias"),

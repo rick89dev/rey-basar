@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<div class="res-cab"><h1>Contratos</h1><div class="res-acciones"><a href="/admin/contratos/nuevo" class="btn-negro">+ CONTRATO</a></div></div>
+<p class="ad-ayuda">Cuando alguien te vende piezas o te las deja a consignación, registra aquí el contrato, imprímelo y fírmenlo. Piezas de {{ cfg.INE_DESDE|pesos }} o más requieren copia de INE.</p>
+{% if contratos %}
+<ul class="vf-lista res-bloque">
+  {% for c in contratos %}
+  <li class="vf">
+    <div class="vf-info"><a href="/admin/contratos/{{ c.id }}"><b>{{ c.folio }} · {{ c.nombre }}</b></a><br>
+      <small>{{ c.creado.strftime('%d/%m/%Y') }} · {{ c.modalidad_nombre }} · {{ c.piezas|length }} pieza(s)
+        {% if c.firmado %}<span class="estado pagado">Firmado</span>{% else %}<span class="estado sinpago">Sin firmar</span>{% endif %}
+        {% if c.requiere_ine(cfg.INE_DESDE) %}{% if c.ine_archivo %}<span class="tag gris">INE ✓</span>{% else %}<span class="tag rojo-tag">FALTA INE</span>{% endif %}{% endif %}</small></div>
+    <div class="vf-num"><b>{{ c.total_venta|pesos }}</b><small>al vendedor: {{ c.total_vendedor|pesos }}</small></div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}<div class="vacio"><img src="/static/img/conejo-300.webp" alt=""><p>Aún no hay contratos.</p><a href="/admin/contratos/nuevo" class="btn-negro">+ CONTRATO</a></div>{% endif %}
+{% endblock %}

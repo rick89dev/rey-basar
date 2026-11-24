@@ -40,9 +40,14 @@ ENTREGA_CIUDAD = os.getenv("REYBASAR_ENTREGA_CIUDAD", "Cuernavaca")
 ENTREGA_COSTO = int(os.getenv("REYBASAR_ENTREGA_COSTO", "0"))  # 0 = se confirma por WhatsApp
 ENTREGA_GRATIS_DESDE = int(os.getenv("REYBASAR_ENTREGA_GRATIS_DESDE", "0"))  # 0 = sin promoción
 
-# Quiero vender: lo que recibe el vendedor (porcentaje del precio de venta)
-CONSIGNA_PCT = int(os.getenv("REYBASAR_CONSIGNA_PCT", "60"))
-COMPRA_DIRECTA_PCT = int(os.getenv("REYBASAR_COMPRA_DIRECTA_PCT", "35"))
+# Quiero vender. Consignación: lo que recibe el vendedor se acuerda pieza por pieza (sin %).
+# Compra directa de usados: % del precio de venta estimado, si la pieza está en buenas condiciones.
+COMPRA_PCT_MIN = int(os.getenv("REYBASAR_COMPRA_PCT_MIN", "20"))
+COMPRA_PCT_MAX = int(os.getenv("REYBASAR_COMPRA_PCT_MAX", "25"))
+# Contratos: piezas con precio igual o mayor a esto requieren copia de INE del vendedor
+INE_DESDE = int(os.getenv("REYBASAR_INE_DESDE", "1000"))
+# Archivos privados (copias de INE): NUNCA dentro de media/ (que es público)
+PRIVADO_DIR = Path(os.getenv("REYBASAR_PRIVADO_DIR", BASE_DIR / "privado"))
 
 CATEGORIAS = [
     ("dama", "Dama"),

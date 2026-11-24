@@ -16,8 +16,7 @@
     <article class="v-card">
       <span class="v-tag">Recibes más</span>
       <h3>A consignación</h3>
-      <p class="v-pct">{{ cfg.CONSIGNA_PCT }}%</p>
-      <p class="v-sub">del precio de venta, cuando se vende</p>
+      <p class="v-sub">Acordamos contigo, pieza por pieza, cuánto recibes cuando se venda.</p>
       <ul>
         <li>Tus piezas siguen siendo tuyas hasta que se venden</li>
         <li>Nosotros ponemos fotos, publicación y atención al cliente</li>
@@ -28,24 +27,17 @@
     <article class="v-card oscura">
       <span class="v-tag">Dinero hoy</span>
       <h3>Te lo compramos</h3>
-      <p class="v-pct">{{ cfg.COMPRA_DIRECTA_PCT }}%</p>
-      <p class="v-sub">del precio de venta estimado, pagado al momento</p>
+      <p class="v-pct">{{ cfg.COMPRA_PCT_MIN }}–{{ cfg.COMPRA_PCT_MAX }}%</p>
+      <p class="v-sub">del precio de venta estimado, pagado al momento, si la prenda está en buenas condiciones</p>
       <ul>
         <li>Pago inmediato, sin esperar a que se venda</li>
-        <li>Revisamos las piezas y te hacemos una oferta</li>
+        <li>Revisamos cada pieza y te hacemos una oferta según su estado</li>
         <li>Ideal si quieres vaciar tu clóset rápido</li>
         <li>Sin trámites ni comisiones extra</li>
       </ul>
     </article>
   </div>
 
-  <div class="calc">
-    <label>Si tu pieza se vende en <span>$</span><input id="calcPrecio" type="number" min="0" step="10" value="300"></label>
-    <div class="calc-res">
-      <p>A consignación recibes <b id="calcC"></b></p>
-      <p>Si te la compramos hoy recibes <b id="calcD"></b></p>
-    </div>
-  </div>
 </section>
 
 <section class="v-pasos">
@@ -54,8 +46,16 @@
     <li><b>1</b><h4>Cuéntanos qué tienes</h4><p>Llena el formulario o mándanos fotos por WhatsApp.</p></li>
     <li><b>2</b><h4>Revisamos tus piezas</h4><p>Te decimos cuáles aceptamos y en cuánto se pueden vender.</p></li>
     <li><b>3</b><h4>Elige la opción</h4><p>Consignación o compra directa, tú decides.</p></li>
-    <li><b>4</b><h4>Recibe tu dinero</h4><p>Hoy mismo o cuando se venda, por transferencia o efectivo.</p></li>
+    <li><b>4</b><h4>Firmamos y recibes tu dinero</h4><p>Firmamos un contrato sencillo y te pagamos hoy o cuando se venda.</p></li>
   </ol>
+  <div class="v-contrato">
+    <h4>📝 Contrato y requisitos</h4>
+    <ul>
+      <li>Al entregarnos tus piezas firmamos un <b>contrato</b> donde declaras que son <b>de tu propiedad</b> y de procedencia legal.</li>
+      <li>Para piezas de <b>{{ cfg.INE_DESDE|pesos }} o más</b> te pedimos una <b>copia de tu INE</b>. Así evitamos recibir artículos robados y nos protegemos ambos.</li>
+      <li>Tu copia de INE se guarda de forma privada y solo se usa para este fin, conforme a nuestro <a class="subraya" href="/aviso-de-privacidad">Aviso de privacidad</a>.</li>
+    </ul>
+  </div>
   <div class="v-acepta">
     <div><h4>Sí aceptamos</h4><p>Ropa de dama, caballero y niños, calzado, juguetes y accesorios, nuevos o seminuevos, limpios y en buen estado.</p></div>
     <div><h4>No aceptamos</h4><p>Ropa interior, prendas rotas, manchadas o con mal olor, juguetes incompletos o que no funcionen.</p></div>
@@ -74,8 +74,8 @@
       </select></label>
     <label>¿Cuántas piezas aprox.?<input name="piezas" type="number" min="1" value="10"></label>
     <fieldset><legend>Opción que prefieres</legend>
-      <label class="radio"><input type="radio" name="opcion" value="Consignación" checked> Consignación ({{ cfg.CONSIGNA_PCT }}%)</label>
-      <label class="radio"><input type="radio" name="opcion" value="Compra directa"> Compra directa ({{ cfg.COMPRA_DIRECTA_PCT }}%)</label>
+      <label class="radio"><input type="radio" name="opcion" value="Consignación" checked> Consignación</label>
+      <label class="radio"><input type="radio" name="opcion" value="Compra directa"> Compra directa</label>
       <label class="radio"><input type="radio" name="opcion" value="Aún no sé"> Aún no sé</label>
     </fieldset>
     <label class="ancho">Comentarios<textarea name="comentario" rows="3" placeholder="Marcas, tallas, estado…"></textarea></label>
@@ -85,5 +85,5 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script>RB.vender({{ cfg.CONSIGNA_PCT }}, {{ cfg.COMPRA_DIRECTA_PCT }}, "{{ cfg.WHATSAPP }}");</script>
+<script>RB.vender("{{ cfg.WHATSAPP }}");</script>
 {% endblock %}

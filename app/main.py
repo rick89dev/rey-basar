@@ -399,6 +399,8 @@ def api_estado(pid: int, visible: bool | None = Form(None), db=Depends(get_db)):
 
 from .cuenta import router as router_cuenta  # noqa: E402
 from .admin_extra import router as router_admin_extra  # noqa: E402
+from .contratos import router as router_contratos  # noqa: E402
 
 app.include_router(router_cuenta)
 app.include_router(router_admin_extra)
+app.include_router(router_contratos)

@@ -4,14 +4,14 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin · ReyBasar</title>
 <link rel="icon" href="/static/img/favicon.png">
-<link rel="stylesheet" href="/static/rb.css?v=19">
+<link rel="stylesheet" href="/static/rb.css?v={{ ASSET_V.css }}">
 <meta name="robots" content="noindex">
 </head>
 <body class="admin">
 <header class="ad-hd">
   <a href="/admin"><img src="/static/img/logo-blanco-420.webp" alt="ReyBasar" height="34" width="130"></a>
   <button class="ad-burger" aria-label="Menú" onclick="this.parentNode.classList.toggle('abierto')"><span></span><span></span><span></span></button>
-  <nav><a href="/admin">Resumen</a><a href="/admin/productos">Productos</a><a href="/admin/nuevo">+ Nuevo</a><a href="/admin/pedidos">Pedidos</a><a href="/admin/gastos">Gastos</a><a href="/admin/usuarios">Usuarios</a><a href="/" target="_blank">Ver tienda</a><a href="/cuenta/salir">Salir{% if usuario %} ({{ usuario.primer_nombre }}){% endif %}</a></nav>
+  <nav><a href="/admin">Resumen</a><a href="/admin/productos">Productos</a><a href="/admin/nuevo">+ Nuevo</a><a href="/admin/pedidos">Pedidos</a><a href="/admin/gastos">Gastos</a><a href="/admin/contratos">Contratos</a><a href="/admin/usuarios">Usuarios</a><a href="/" target="_blank">Ver tienda</a><a href="/cuenta/salir">Salir{% if usuario %} ({{ usuario.primer_nombre }}){% endif %}</a></nav>
 </header>
 <main class="ad-main">{% block contenido %}{% endblock %}</main>
 </body>

@@ -151,10 +151,7 @@ const RB = (() => {
     return cambio;
   }
 
-  function vender(pctC, pctD, wa) {
-    const inp = $("#calcPrecio");
-    const calc = () => { const v = +inp.value || 0; $("#calcC").textContent = pesos(Math.round(v * pctC / 100)); $("#calcD").textContent = pesos(Math.round(v * pctD / 100)); };
-    inp.oninput = calc; calc();
+  function vender(wa) {
     $("#formVender").onsubmit = e => {
       e.preventDefault();
       const d = Object.fromEntries(new FormData(e.target));
