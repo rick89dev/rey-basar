@@ -29,7 +29,7 @@
   <div class="grid-listado">{% for p in productos %}{{ tarjeta(p, 'desc' if p.descuento_pct else '') }}{% endfor %}</div>
   {% else %}
   <div class="vacio">
-    <img src="/static/img/conejo.png" alt="">
+    <img src="/static/img/conejo-300.webp" alt="">
     <p>{% if q is defined and q %}No encontramos piezas con “{{ q }}”.{% else %}Por ahora no hay piezas aquí. ¡Vuelve pronto, subimos producto nuevo cada semana!{% endif %}</p>
     <a href="/" class="btn-negro">VOLVER AL INICIO</a>
   </div>

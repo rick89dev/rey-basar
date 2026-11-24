@@ -24,7 +24,7 @@
   <tbody>
   {% for p in productos %}
   <tr class="{{ 'vendido' if p.vendido }} {{ 'oculto' if not p.visible }}">
-    <td><a href="/admin/producto/{{ p.id }}"><img src="{{ p.foto or '/static/img/conejo.png' }}" alt=""></a></td>
+    <td><a href="/admin/producto/{{ p.id }}"><img src="{{ p.foto or '/static/img/conejo-300.webp' }}" alt=""></a></td>
     <td><a href="/admin/producto/{{ p.id }}"><b>{{ p.nombre }}</b></a><br><small>{{ p.sku }} · {{ p.categoria_nombre }}{% if p.subcategoria_nombre %} {{ p.subcategoria_nombre }}{% endif %} · {{ 'Nuevo' if p.condicion == 'nuevo' else 'Seminuevo' }}{% if p.talla %} · T. {{ p.talla }}{% endif %}</small>
       {% if p.vendido %}<br><small class="tag">AGOTADO</small>{% elif p.apartado %}<br><small class="tag">APARTADO</small>{% elif not p.visible %}<br><small class="tag gris">OCULTO</small>{% endif %}
       {% if p.origen == 'consigna' %}<br><small class="tag gris">CONSIGNACIÓN{% if p.vendedor %}: {{ p.vendedor }}{% endif %}</small>{% endif %}
@@ -41,6 +41,6 @@
   </tbody>
 </table>
 {% else %}
-<div class="vacio"><img src="/static/img/conejo.png" alt=""><p>No hay productos {{ 'con ese filtro' if q or estado else 'todavía' }}.</p><a href="/admin/nuevo" class="btn-negro">+ NUEVO PRODUCTO</a></div>
+<div class="vacio"><img src="/static/img/conejo-300.webp" alt=""><p>No hay productos {{ 'con ese filtro' if q or estado else 'todavía' }}.</p><a href="/admin/nuevo" class="btn-negro">+ NUEVO PRODUCTO</a></div>
 {% endif %}
 {% endblock %}

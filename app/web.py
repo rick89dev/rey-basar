@@ -36,7 +36,7 @@ def foto_categoria(clave: str, ancho: int = 900) -> str:
     if local.exists():
         return f"/static/img/categorias/foto-{clave}.jpg"
     return (f"https://images.unsplash.com/photo-{FOTOS_CATEGORIA.get(clave, FOTOS_CATEGORIA['otros'])}"
-            f"?w={ancho}&q=75&fit=crop&auto=format")
+            f"?w={ancho}&q=60&fit=crop&auto=format")
 
 
 templates.env.filters["pesos"] = pesos

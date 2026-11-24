@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% from "_tarjeta.html" import fila, tarjeta %}
+{% block head %}
+<link rel="preload" as="image" imagesrcset="/static/img/banners/inicio-movil-480.webp 480w, /static/img/banners/inicio-movil.webp 800w" imagesizes="100vw" media="(max-width:760px)" fetchpriority="high">
+<link rel="preload" as="image" imagesrcset="/static/img/banners/inicio-1000.webp 1000w, /static/img/banners/inicio.webp 1600w" imagesizes="(max-width:1280px) 100vw, 1280px" media="(min-width:761px)" fetchpriority="high">
+{% endblock %}
 {% block contenido %}
 
 {# Banners siempre arriba #}
@@ -7,8 +11,8 @@
   {% for b in banners %}
   <a class="banner" href="{{ b.url }}" {% if not loop.first %}hidden{% endif %}>
     <picture>
-      <source media="(max-width:760px)" srcset="/static/img/banners/{{ b.img }}-movil.jpg">
-      <img src="/static/img/banners/{{ b.img }}.jpg" alt="{{ b.alt }}" {% if not loop.first %}loading="lazy"{% endif %} width="1600" height="560">
+      <source media="(max-width:760px)" srcset="/static/img/banners/{{ b.img }}-movil-480.webp 480w, /static/img/banners/{{ b.img }}-movil.webp 800w" sizes="100vw" width="800" height="1000">
+      <img src="/static/img/banners/{{ b.img }}.webp" srcset="/static/img/banners/{{ b.img }}-1000.webp 1000w, /static/img/banners/{{ b.img }}.webp 1600w" sizes="(max-width:1280px) 100vw, 1280px" alt="{{ b.alt }}" {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} width="1600" height="560">
     </picture>
   </a>
   {% endfor %}
@@ -21,7 +25,7 @@
   {% set tiles = [('juguetes','Juguetes','a'),('caballero','Caballero','b'),('dama','Dama','c'),('ninos','Niños','d'),('ninas','Niñas','e')] %}
   {% for clave, nombre, area in tiles %}
   <a href="/categoria/{{ clave }}" class="tile tile-{{ area }}">
-    <img src="{{ foto_categoria(clave, 1000 if area == 'c' else 800) }}" alt="{{ nombre }}" loading="lazy" onerror="this.onerror=null;this.src='/static/img/categorias/{{ clave }}.jpg'">
+    <img src="{{ foto_categoria(clave, 640 if area == 'c' else 520) }}" alt="" loading="lazy" width="800" height="420" onerror="this.onerror=null;this.src='/static/img/categorias/{{ clave }}.webp'">
     <span class="etq">{{ nombre|upper }}</span>
   </a>
   {% endfor %}
@@ -40,14 +44,14 @@
 
 <a class="banner-fijo" href="/quiero-vender">
   <picture>
-    <source media="(max-width:760px)" srcset="/static/img/banners/vender-movil.jpg">
-    <img src="/static/img/banners/vender.jpg" alt="¿Ya no lo usas? Véndelo con nosotros: consignación o compra directa" loading="lazy" width="1600" height="560">
+    <source media="(max-width:760px)" srcset="/static/img/banners/vender-movil-480.webp 480w, /static/img/banners/vender-movil.webp 800w" sizes="100vw" width="800" height="1000">
+    <img src="/static/img/banners/vender.webp" srcset="/static/img/banners/vender-1000.webp 1000w, /static/img/banners/vender.webp 1600w" sizes="(max-width:1280px) 100vw, 1280px" alt="¿Ya no lo usas? Véndelo con nosotros: consignación o compra directa" loading="lazy" width="1600" height="560">
   </picture>
 </a>
 
 {% if not hay_productos %}
 <section class="pronto">
-  <img src="/static/img/conejo.png" alt="">
+  <img src="/static/img/conejo-300.webp" alt="">
   <div>
     <h2>Estamos subiendo las primeras piezas</h2>
     <p>Muy pronto verás aquí ropa y juguetes nuevos y seminuevos. Síguenos para enterarte primero.</p>

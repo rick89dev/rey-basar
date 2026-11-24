@@ -1,10 +1,10 @@
 /* fuente local */
-@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Regular.ttf) format("truetype");font-weight:400;font-display:swap}
-@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-SemiBold.ttf) format("truetype");font-weight:600;font-display:swap}
-@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Bold.ttf) format("truetype");font-weight:700;font-display:swap}
-@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Black.ttf) format("truetype");font-weight:900;font-display:swap}
+@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Regular.woff2) format("woff2"),url(/static/fonts/TitilliumWeb-Regular.ttf) format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-SemiBold.woff2) format("woff2"),url(/static/fonts/TitilliumWeb-SemiBold.ttf) format("truetype");font-weight:600;font-display:swap}
+@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Bold.woff2) format("woff2"),url(/static/fonts/TitilliumWeb-Bold.ttf) format("truetype");font-weight:700;font-display:swap}
+@font-face{font-family:"Titillium Web";src:url(/static/fonts/TitilliumWeb-Black.woff2) format("woff2"),url(/static/fonts/TitilliumWeb-Black.ttf) format("truetype");font-weight:900;font-display:swap}
 /* ReyBasar — estilos basados en el diseño original (negro / gris / blanco, Titillium Web) */
-:root{--oro:#f2b630;--oro2:#d99a12;--negro:#000;--gris:#e6e6e6;--gris2:#d9d9d9;--gris-t:#666;--wa:#1faa53;--max:1280px;--rojo:#c62828}
+:root{--oro:#f2b630;--oro2:#d99a12;--negro:#000;--gris:#e6e6e6;--gris2:#d9d9d9;--gris-t:#666;--wa:#11823f;--max:1280px;--rojo:#c62828}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;font-family:"Titillium Web",system-ui,sans-serif;color:#111;background:#fff;-webkit-font-smoothing:antialiased}
@@ -62,7 +62,7 @@ h1,h2,h3{letter-spacing:.04em}
 .hero-txt{border:1px solid #333;padding:6px 10px 8px;display:flex;flex-direction:column}
 .hero-txt strong{font-size:24px;line-height:1.2;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero-txt span{font-size:18px}
-.hero-txt s{color:#888;font-size:15px}
+.hero-txt s{color:#5c5c5c;font-size:15px}
 .hero-txt em{font-style:normal;letter-spacing:.12em;font-size:14px}
 .hero-btn{display:block;border:1px solid #333;border-top:0;padding:8px;font-weight:700;letter-spacing:.12em;font-size:14px}
 .hero-btn:hover{background:#000;color:#fff}
@@ -109,7 +109,7 @@ h1,h2,h3{letter-spacing:.04em}
 .card:hover .card-img img{transform:scale(1.04)}
 .card-img img.sin-foto{opacity:.1;padding:20%}
 .card-precio{font-size:16px}
-.card-antes{color:#888;font-size:13px;line-height:1}
+.card-antes{color:#5c5c5c;font-size:13px;line-height:1}
 .card-nombre{font-weight:700;letter-spacing:.04em;font-size:15px;line-height:1.2}
 .card-talla{font-size:13px;color:var(--gris-t)}
 .sello{position:absolute;top:4px;right:4px;font-style:normal}
@@ -158,7 +158,7 @@ h1,h2,h3{letter-spacing:.04em}
 .sku{font-size:13px;color:#444}
 .pdp-info h1{margin:4px 0;font-size:32px;line-height:1.15}
 .pdp-precio{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px}
-.pdp-precio s{color:#888;font-weight:400;font-size:20px}
+.pdp-precio s{color:#5c5c5c;font-weight:400;font-size:20px}
 .pill-desc{background:#000;color:#fff;font-size:14px;padding:2px 10px}
 .pdp-desc{font-size:17px;line-height:1.5;color:#333;white-space:pre-line;border-bottom:1px solid #bbb;padding-bottom:16px}
 .pdp-datos{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:17px;margin:18px 0}
@@ -176,7 +176,7 @@ h1,h2,h3{letter-spacing:.04em}
 .carrito-lista li{display:grid;grid-template-columns:90px 1fr auto auto;gap:18px;align-items:center;border-bottom:1px solid #ddd;padding:12px 0}
 .carrito-lista img{width:90px;height:110px;object-fit:contain;background:#fafafa}
 .carrito-lista small{color:var(--gris-t);display:block}
-.carrito-lista button{background:none;border:0;font-size:22px;color:#999}
+.carrito-lista button{background:none;border:0;font-size:22px;color:#666}
 .resumen{background:var(--gris);padding:20px;display:flex;flex-direction:column;gap:10px}
 .resumen h2{margin:0;text-transform:uppercase;font-size:20px}
 .resumen p{display:flex;justify-content:space-between;margin:0;font-size:17px}
@@ -260,7 +260,7 @@ legend{font-weight:600}
 .ad-tabla tr.vendido{opacity:.55}
 .ad-tabla tr.oculto td{background:#fafafa}
 .tag{background:#000;color:#fff;padding:0 6px;font-size:11px;letter-spacing:.08em}
-.tag.gris{background:#888}
+.tag.gris{background:#666}
 .mini{background:#fff;border:1px solid #000;padding:3px 10px;font-size:13px}
 .mini:hover{background:#000;color:#fff}
 .mini.rojo{border-color:var(--rojo);color:var(--rojo)}
@@ -400,7 +400,7 @@ legend{font-weight:600}
 .lista-pedidos span{color:#555}
 .estado{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 10px;background:#eee;color:#333;vertical-align:middle}
 .estado.nuevo{background:var(--oro);color:#000}.estado.confirmado{background:#1c64f2;color:#fff}
-.estado.entregado{background:#1faa53;color:#fff}.estado.cancelado{background:#999;color:#fff}
+.estado.entregado{background:#1faa53;color:#fff}.estado.cancelado{background:#666;color:#fff}
 .pedido-ok{background:#fff6dd;border-left:6px solid var(--oro);padding:20px 26px;margin-bottom:20px}
 .pedido-ok h1{margin:0 0 6px;text-transform:uppercase}.pedido-ok h1 small{font-size:18px;color:#555}
 .pedido-ok p{font-size:17px}
@@ -471,7 +471,7 @@ legend{font-weight:600}
 .c-cant button:disabled{opacity:.3}
 .c-cant span{min-width:22px;text-align:center;font-weight:700}
 .c-cant small{width:100%;color:#666}
-.carrito-lista .c-quitar{background:none;border:0;font-size:22px;color:#999}
+.carrito-lista .c-quitar{background:none;border:0;font-size:22px;color:#666;min-width:32px;min-height:32px}
 .cant{flex-direction:row;align-items:center;gap:8px}
 .cant input{width:80px}
 
@@ -609,3 +609,13 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
 .subcats a{border:2px solid #000;padding:6px 18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
 .subcats a.on{background:var(--oro);border-color:var(--oro)}
 .mm-sub a{display:block;border-bottom:1px solid #222}
+
+/* Accesibilidad: puntos del carrusel con área táctil de 24px */
+.banners-puntos{gap:4px}
+.banners-puntos button{width:24px;height:24px;border:0;background:none;box-shadow:none;padding:0;display:grid;place-items:center}
+.banners-puntos button::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid #fff;background:#0006;box-shadow:0 0 0 1px #0005}
+.banners-puntos button.on::before{background:var(--oro);border-color:var(--oro)}
+.hd-logo img{width:auto;height:50px}
+@media (max-width:760px){.hd-logo img{height:38px}}
+.ft-conejo{height:auto}
+.banners-puntos button.on{background:none;border:0}

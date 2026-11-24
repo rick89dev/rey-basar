@@ -200,6 +200,7 @@ def main():
             tmp = destino.with_suffix(".png")
             pg.screenshot(path=str(tmp))
             Image.open(tmp).convert("RGB").save(destino, quality=calidad, optimize=True, progressive=True)
+            Image.open(tmp).convert("RGB").save(destino.with_suffix(".webp"), "WEBP", quality=80, method=6)
             tmp.unlink()
             print("✓", destino.relative_to(RAIZ))
 

@@ -1,7 +1,7 @@
 {% macro tarjeta(p, sello='') %}
 <a class="card" href="/producto/{{ p.slug }}">
   <span class="card-img">
-    {% if p.foto %}<img src="{{ p.foto }}" alt="{{ p.nombre }}" loading="lazy">{% else %}<img src="/static/img/conejo.png" class="sin-foto" alt="">{% endif %}
+    {% if p.foto %}<img src="{{ p.foto }}" alt="{{ p.nombre }}" loading="lazy" width="400" height="500">{% else %}<img src="/static/img/conejo-300.webp" class="sin-foto" alt="">{% endif %}
     {% if sello == 'corona' %}<i class="sello sello-corona" title="Destacado"><svg viewBox="0 0 24 18"><path d="M2 16h20M3 13 1 4l6 4 5-7 5 7 6-4-2 9z" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="round"/></svg></i>
     {% elif sello == 'desc' and p.descuento_pct %}<i class="sello sello-etq">{{ p.descuento_pct }}%</i>
     {% endif %}

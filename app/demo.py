@@ -15,8 +15,8 @@ MARCA = "ReyBasar Demo"
 MARCADOR = MEDIA_DIR / ".demo_cargado"
 
 
-def u(foto_id: str, ancho: int = 1000) -> str:
-    return f"https://images.unsplash.com/photo-{foto_id}?w={ancho}&q=80&fit=crop&auto=format"
+def u(foto_id: str, ancho: int = 800) -> str:
+    return f"https://images.unsplash.com/photo-{foto_id}?w={ancho}&q=70&fit=crop&auto=format"
 
 
 PRODUCTOS = [

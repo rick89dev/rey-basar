@@ -10,7 +10,7 @@
   <div class="pdp-in">
     <div class="galeria" id="galeria">
       <div class="galeria-principal">
-        {% for f in p.fotos %}<img src="{{ f.url }}" alt="{{ p.nombre }}" data-i="{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %}>{% else %}<img src="/static/img/conejo.png" alt="" class="sin-foto">{% endfor %}
+        {% for f in p.fotos %}<img src="{{ f.url }}" alt="{{ p.nombre }}" data-i="{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %}>{% else %}<img src="/static/img/conejo-300.webp" alt="" class="sin-foto">{% endfor %}
         {% if p.fotos|length > 1 %}
         <button class="gal-flecha izq" aria-label="Anterior">‹</button><button class="gal-flecha der" aria-label="Siguiente">›</button>
         {% endif %}

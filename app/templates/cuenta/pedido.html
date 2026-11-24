@@ -15,7 +15,7 @@
   <div class="pedido-in">
     <ul class="carrito-lista">
       {% for i in p.items %}
-      <li><img src="{{ i.foto or '/static/img/conejo.png' }}" alt=""><div><b>{{ i.nombre }}</b><small>{{ i.sku }}{% if i.talla %} · Talla {{ i.talla }}{% endif %}</small></div><b>{% if i.cantidad > 1 %}<small>{{ i.cantidad }} × {{ i.precio|pesos }}</small><br>{% endif %}{{ i.total|pesos }}</b></li>
+      <li><img src="{{ i.foto or '/static/img/conejo-300.webp' }}" alt=""><div><b>{{ i.nombre }}</b><small>{{ i.sku }}{% if i.talla %} · Talla {{ i.talla }}{% endif %}</small></div><b>{% if i.cantidad > 1 %}<small>{{ i.cantidad }} × {{ i.precio|pesos }}</small><br>{% endif %}{{ i.total|pesos }}</b></li>
       {% endfor %}
     </ul>
     <aside class="resumen">
