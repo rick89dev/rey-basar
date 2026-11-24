@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+reybasar.db
+media/
+.env
+_to_delete/
+diseno/_tmp.html
+*.tgz

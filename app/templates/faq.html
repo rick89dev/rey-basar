@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Preguntas frecuentes · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="faq">
+  <h1>Preguntas frecuentes</h1>
+  <details open id="envios"><summary>¿Dónde entregan?</summary>
+    <p>Por ahora entregamos <b>solo en {{ cfg.ENTREGA_CIUDAD }}</b>. El lugar y la hora de entrega los acordamos contigo por WhatsApp.</p></details>
+  <details><summary>¿Envían a otras ciudades?</summary>
+    <p>Por ahora no: solo hacemos entregas en {{ cfg.ENTREGA_CIUDAD }}.</p></details>
+  <details><summary>¿Cómo hago un pedido?</summary>
+    <p>Agrega las piezas al carrito, inicia sesión (o crea tu cuenta) y haz tu pedido. Apartamos tus piezas y te contactamos por WhatsApp para acordar el punto de entrega y el pago.</p></details>
+  <details id="pagos"><summary>¿Cómo pago?</summary>
+    <p>Al confirmar tu pedido por WhatsApp te damos las opciones: transferencia, depósito o efectivo contra entrega.</p></details>
+  <details><summary>¿Por qué solo hay una pieza de cada producto?</summary>
+    <p>Muchas de nuestras prendas y juguetes son seminuevos o de lotes pequeños: cada pieza es única. Si te gusta, ¡no lo pienses mucho!</p></details>
+  <details><summary>¿Qué significa “seminuevo”?</summary>
+    <p>Que la pieza ya fue usada, pero la revisamos, está limpia y en buen estado. Si tiene algún detalle lo indicamos en la descripción.</p></details>
+  <details id="cambios"><summary>¿Hay cambios o devoluciones?</summary>
+    <p>Si la pieza no corresponde a la descripción, escríbenos dentro de los 3 días siguientes a recibirla y lo resolvemos.</p></details>
+  <details><summary>Quiero vender mi ropa o juguetes</summary>
+    <p>¡Claro! Revisa las opciones en <a href="/quiero-vender">Quiero vender</a>.</p></details>
+  <p class="faq-contacto">¿Otra duda? <a href="https://wa.me/{{ cfg.WHATSAPP }}" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
+</section>
+{% endblock %}

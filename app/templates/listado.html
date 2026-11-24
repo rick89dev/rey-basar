@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_tarjeta.html" import tarjeta %}
+{% block titulo %}{{ titulo }} · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="listado">
+  <div class="migas"><a href="/">Inicio</a> › {% if sub is defined and sub %}<a href="/categoria/{{ clave }}">{{ titulo.split(' · ')[0] }}</a> › {{ titulo.split(' · ')[1] }}{% else %}{{ titulo }}{% endif %}</div>
+  {% if subs %}
+  <nav class="subcats">
+    <a href="/categoria/{{ clave }}" class="{{ 'on' if not sub }}">Todo</a>
+    {% for k, n in subs %}<a href="/categoria/{{ clave }}/{{ k }}" class="{{ 'on' if sub == k }}">{{ n }}</a>{% endfor %}
+  </nav>
+  {% endif %}
+  <div class="listado-cab">
+    <h1>{{ titulo }} <small>{{ productos|length }} {{ 'pieza' if productos|length == 1 else 'piezas' }}</small></h1>
+    {% if clave %}
+    <div class="filtros">
+      <a href="?orden={{ orden }}" class="{{ 'on' if not condicion }}">Todo</a>
+      <a href="?condicion=nuevo&orden={{ orden }}" class="{{ 'on' if condicion == 'nuevo' }}">Nuevo</a>
+      <a href="?condicion=usado&orden={{ orden }}" class="{{ 'on' if condicion == 'usado' }}">Seminuevo</a>
+      <select onchange="location.search='?condicion={{ condicion }}&orden='+this.value" aria-label="Ordenar">
+        <option value="nuevos" {{ 'selected' if orden == 'nuevos' }}>Más recientes</option>
+        <option value="precio_asc" {{ 'selected' if orden == 'precio_asc' }}>Menor precio</option>
+        <option value="precio_desc" {{ 'selected' if orden == 'precio_desc' }}>Mayor precio</option>
+      </select>
+    </div>
+    {% endif %}
+  </div>
+  {% if productos %}
+  <div class="grid-listado">{% for p in productos %}{{ tarjeta(p, 'desc' if p.descuento_pct else '') }}{% endfor %}</div>
+  {% else %}
+  <div class="vacio">
+    <img src="/static/img/conejo.png" alt="">
+    <p>{% if q is defined and q %}No encontramos piezas con “{{ q }}”.{% else %}Por ahora no hay piezas aquí. ¡Vuelve pronto, subimos producto nuevo cada semana!{% endif %}</p>
+    <a href="/" class="btn-negro">VOLVER AL INICIO</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

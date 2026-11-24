@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<h1>Pedidos</h1>
+<div class="filtros ad-tabs">
+  <a href="/admin/pedidos" class="{{ 'on' if not estado }}">Todos</a>
+  {% for k, n in estados %}<a href="?estado={{ k }}" class="{{ 'on' if estado == k }}">{{ n }} ({{ conteo.get(k, 0) }})</a>{% endfor %}
+  <a href="?estado=por_cobrar" class="{{ 'on' if estado == 'por_cobrar' }}">💰 Por cobrar ({{ conteo.get('por_cobrar', 0) }})</a>
+</div>
+{% if pedidos %}
+<table class="ad-tabla">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Punto de entrega</th><th>Piezas</th><th>Total</th><th>Estado</th><th>Pago</th></tr></thead>
+  <tbody>
+  {% for p in pedidos %}
+  <tr onclick="location='/admin/pedidos/{{ p.id }}'" style="cursor:pointer">
+    <td><a href="/admin/pedidos/{{ p.id }}"><b>{{ p.folio }}</b></a></td>
+    <td>{{ p.creado.strftime('%d/%m %H:%M') }}</td>
+    <td>{{ p.nombre }}<br><small>{{ p.telefono }}</small></td>
+    <td>{{ p.direccion or 'Por acordar' }}</td>
+    <td>{{ p.items|sum(attribute="cantidad") }}</td>
+    <td>{{ p.total|pesos }}</td>
+    <td><span class="estado {{ p.estado }}">{{ p.estado_nombre }}</span></td>
+    <td>{% if p.pagado %}<span class="estado pagado">Pagado</span><br><small>{{ p.metodo_nombre }}</small>{% elif p.estado != 'cancelado' %}<span class="estado sinpago">Sin pago</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="vacio"><img src="/static/img/conejo.png" alt=""><p>No hay pedidos {{ 'en este estado' if estado else 'todavía' }}.</p></div>{% endif %}
+{% endblock %}

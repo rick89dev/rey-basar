@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+{% if ok == '1' %}<p class="ok">Gasto guardado ✓ Ya cuenta en tu inversión.</p>{% elif ok == 'borrado' %}<p class="ok">Gasto borrado.</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<div class="res-cab"><h1>Gastos de operación</h1></div>
+<p class="ad-ayuda">Todo lo que pagas para operar y no es mercancía: servidor, licencias, pasajes, publicidad, bolsas… Se suma a tu <b>inversión total</b> en el resumen.</p>
+
+<section class="res-bloque">
+  <h2>{{ 'Editar gasto' if editar else 'Nuevo gasto' }}</h2>
+  {% with g=editar, volver='' %}{% include "admin/_form_gasto.html" %}{% endwith %}
+</section>
+
+<section class="finanzas finanzas-res" style="margin-top:12px">
+  <div class="fz-tarjeta"><small>Total en gastos</small><b>{{ total|pesos }}</b><span>{{ gastos|length if not categoria else '' }}{{ ' registro(s)' if not categoria }}</span></div>
+  {% for k, n in cats %}{% if por_cat.get(k) %}
+  <a class="fz-tarjeta {{ 'activa' if categoria == k }}" href="/admin/gastos{{ '' if categoria == k else '?categoria=' ~ k }}"><small>{{ n }}</small><b>{{ por_cat[k]|pesos }}</b><span>{{ (100 * por_cat[k] / total)|round|int }}% de tus gastos</span></a>
+  {% endif %}{% endfor %}
+</section>
+{% if por_mes %}<p class="por-mes">Por mes: {% for m, t in por_mes %}<span><b>{{ m[5:] }}/{{ m[:4] }}</b> {{ t|pesos }}</span>{% endfor %}</p>{% endif %}
+
+<section class="res-bloque">
+  <h2>{% if categoria %}{{ dict(cats)[categoria] }} <a href="/admin/gastos" class="mini-link">ver todos</a>{% else %}Todos los gastos{% endif %}</h2>
+  {% if gastos %}
+  <ul class="vf-lista">
+    {% for g in gastos %}
+    <li class="vf">
+      <div class="vf-info"><b>{{ g.concepto }}</b><br><small>{{ g.fecha.strftime('%d/%m/%Y') }} · {{ g.categoria_nombre }}{% if g.nota %} · {{ g.nota }}{% endif %}</small></div>
+      <div class="vf-num"><b>{{ g.monto|pesos }}</b></div>
+      <div class="vf-acc">
+        <a href="/admin/gastos?editar={{ g.id }}" class="mini">Editar</a>
+        <form method="post" action="/admin/gastos/{{ g.id }}/borrar" onsubmit="return confirm('¿Borrar este gasto?')"><button class="mini rojo">Borrar</button></form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="res-vacio">Aún no registras gastos{{ ' en esta categoría' if categoria }}.</p>{% endif %}
+</section>
+{% endblock %}

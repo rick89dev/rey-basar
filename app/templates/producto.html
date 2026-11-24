@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_tarjeta.html" import tarjeta %}
+{% block titulo %}{{ p.nombre }} · ReyBasar{% endblock %}
+{% block meta %}{{ p.nombre }} {{ 'nuevo' if p.condicion == 'nuevo' else 'seminuevo' }} a {{ p.precio|pesos }}. {{ p.descripcion[:120] }}{% endblock %}
+{% block og_titulo %}{{ p.nombre }} · {{ p.precio|pesos }} · ReyBasar{% endblock %}
+{% block og_imagen %}{% if p.foto %}{{ request.base_url }}{{ p.foto[1:] }}{% else %}{{ request.base_url }}static/img/compartir.jpg{% endif %}{% endblock %}
+{% block contenido %}
+<section class="pdp">
+  <div class="migas"><a href="/">Home</a> | <a href="/categoria/{{ p.categoria }}">{{ p.categoria_nombre }}</a> | {% if p.subcategoria_nombre %}<a href="/categoria/{{ p.categoria }}/{{ p.subcategoria }}">{{ p.subcategoria_nombre }}</a> | {% endif %}<b>{{ p.nombre }}</b></div>
+  <div class="pdp-in">
+    <div class="galeria" id="galeria">
+      <div class="galeria-principal">
+        {% for f in p.fotos %}<img src="{{ f.url }}" alt="{{ p.nombre }}" data-i="{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %}>{% else %}<img src="/static/img/conejo.png" alt="" class="sin-foto">{% endfor %}
+        {% if p.fotos|length > 1 %}
+        <button class="gal-flecha izq" aria-label="Anterior">‹</button><button class="gal-flecha der" aria-label="Siguiente">›</button>
+        {% endif %}
+      </div>
+      {% if p.fotos|length > 1 %}
+      <div class="miniaturas">{% for f in p.fotos %}<button data-i="{{ loop.index0 }}" class="{{ 'on' if loop.first }}"><img src="{{ f.url }}" alt=""></button>{% endfor %}</div>
+      {% endif %}
+    </div>
+    <div class="pdp-info">
+      <small class="sku">SKU {{ p.sku }}</small>
+      <h1>{{ p.nombre }}</h1>
+      <div class="pdp-precio">
+        {% if p.precio_antes and p.precio_antes > p.precio %}<s>{{ p.precio_antes|pesos }}</s>{% endif %}
+        {{ p.precio|pesos }}
+        {% if p.descuento_pct %}<span class="pill-desc">-{{ p.descuento_pct }}%</span>{% endif %}
+      </div>
+      {% if p.descripcion %}<p class="pdp-desc">{{ p.descripcion }}</p>{% endif %}
+      <dl class="pdp-datos">
+        <dt>Estado</dt><dd><span class="sello-cond {{ p.condicion }} inline">{{ 'Nuevo' if p.condicion == 'nuevo' else 'Seminuevo' }}</span></dd>
+        {% if p.talla %}<dt>Talla</dt><dd>{{ p.talla }}</dd>{% endif %}
+        {% if p.marca %}<dt>Marca</dt><dd>{{ p.marca }}</dd>{% endif %}
+        <dt>Disponibles</dt><dd>{% if p.disponibles == 1 %}{% if p.piezas == 1 %}1 pieza (única){% else %}¡Última pieza!{% endif %}{% else %}{{ p.disponibles }} piezas{% endif %}</dd>
+      </dl>
+      {% if p.vendido %}
+      <div class="agotado">Esta pieza ya se vendió</div>
+      {% elif p.apartado %}
+      <div class="agotado">Pieza apartada en un pedido</div>
+      <p><a class="subraya" target="_blank" rel="noopener" href="https://wa.me/{{ cfg.WHATSAPP }}?text={{ quote('Hola ReyBasar, ¿me avisan si se libera ' ~ p.nombre ~ ' (' ~ p.sku ~ ')?') }}">Avísame si se libera</a></p>
+      {% else %}
+      <div class="pdp-botones">
+        {% if p.disponibles > 1 %}<label class="cant">Cantidad<input type="number" id="cantidad" min="1" max="{{ p.disponibles }}" value="1"></label>{% endif %}
+        <button class="btn-negro" id="agregar" data-max="{{ p.disponibles }}"
+          data-id="{{ p.id }}" data-sku="{{ p.sku }}" data-nombre="{{ p.nombre }}" data-precio="{{ p.precio }}"
+          data-foto="{{ p.foto or '' }}" data-slug="{{ p.slug }}" data-talla="{{ p.talla }}">AGREGAR A CARRITO</button>
+        <a class="btn-wa" target="_blank" rel="noopener"
+          href="https://wa.me/{{ cfg.WHATSAPP }}?text={{ quote('Hola ReyBasar, me interesa ' ~ p.nombre ~ ' (' ~ p.sku ~ ') de ' ~ (p.precio|pesos) ~ '. ¿Sigue disponible?') }}">
+          PREGUNTAR POR WHATSAPP</a>
+      </div>
+      {% endif %}
+      <div class="pdp-envio">
+        <p>📍 <b>Entrega solo en {{ cfg.ENTREGA_CIUDAD }}.</b> Acordamos contigo el lugar y la hora por WhatsApp.</p>
+      </div>
+      <div class="compartir"><span>Compartir</span>
+        <a target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u={{ quote(request.url|string) }}" aria-label="Facebook">f</a>
+        <a target="_blank" rel="noopener" href="https://wa.me/?text={{ quote(p.nombre ~ ' ' ~ (request.url|string)) }}" aria-label="WhatsApp">w</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% if relacionados %}
+<section class="fila">
+  <h2 class="fila-t centro"><span>Productos relacionados</span></h2>
+  <div class="grid6">{% for r in relacionados %}{{ tarjeta(r) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

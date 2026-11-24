@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block titulo %}Aviso de privacidad · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="legal">
+  <h1>Aviso de privacidad</h1>
+  <p class="legal-fecha">Última actualización: {{ cfg.ACTUALIZACION_LEGAL }}</p>
+
+  <h2>1. Responsable de tus datos</h2>
+  <p><b>ReyBasar</b> es responsable del tratamiento de tus datos personales, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Puedes contactarnos por <a href="https://wa.me/{{ cfg.WHATSAPP }}" target="_blank" rel="noopener">WhatsApp</a> o al {{ cfg.TELEFONO }}.</p>
+
+  <h2>2. Datos que recabamos</h2>
+  <p>Recabamos los datos que tú nos das al usar el sitio:</p>
+  <ul>
+    <li><b>Al crear tu cuenta:</b> nombre, correo electrónico (para iniciar sesión), teléfono de WhatsApp y contraseña (se guarda cifrada; nadie puede verla).</li>
+    <li><b>Al hacer un pedido:</b> el punto de entrega que prefieras (opcional), tus notas y las piezas que pediste.</li>
+    <li><b>Al usar “Quiero vender”:</b> nombre, teléfono y la descripción de las piezas que quieres vender. Esta información nos llega por WhatsApp.</li>
+  </ul>
+  <p><b>No recabamos datos sensibles</b> ni datos de tarjetas bancarias: los pagos se acuerdan directamente contigo por WhatsApp.</p>
+
+  <h2>3. Para qué usamos tus datos</h2>
+  <p><b>Finalidades necesarias</b> (sin ellas no podemos atenderte):</p>
+  <ul>
+    <li>Crear y administrar tu cuenta.</li>
+    <li>Recibir tus pedidos, apartar tus piezas y coordinar contigo la entrega y el pago.</li>
+    <li>Contactarte por WhatsApp o teléfono sobre tus pedidos, cambios o devoluciones.</li>
+    <li>Atender tu solicitud de venta a consignación o compra directa de tus piezas.</li>
+    <li>Cumplir obligaciones legales y fiscales.</li>
+  </ul>
+  <p><b>Finalidades adicionales</b> (requieren tu consentimiento y puedes negarte sin que eso afecte tus compras):</p>
+  <ul>
+    <li>Avisarte de piezas nuevas, descuentos y promociones por WhatsApp.</li>
+  </ul>
+  <p>Si no quieres recibir avisos de promociones, escríbenos por WhatsApp en cualquier momento y dejaremos de enviártelos.</p>
+
+  <h2>4. Con quién compartimos tus datos</h2>
+  <p>No vendemos ni rentamos tus datos. Solo los comparten:</p>
+  <ul>
+    <li>Los proveedores que nos ayudan a operar, únicamente para ese fin: el servicio de hospedaje del sitio y WhatsApp como medio de comunicación.</li>
+    <li>Las autoridades que lo requieran conforme a la ley.</li>
+  </ul>
+
+  <h2>5. Cookies y almacenamiento en tu navegador</h2>
+  <p>Usamos una cookie de sesión para mantener tu cuenta abierta y guardamos tu carrito en tu propio navegador. No usamos cookies de publicidad ni de rastreo de terceros.</p>
+
+  <h2>6. Tus derechos (ARCO)</h2>
+  <p>Tienes derecho a <b>acceder</b> a tus datos, <b>rectificarlos</b> si son incorrectos, <b>cancelarlos</b> u <b>oponerte</b> a su uso, así como a revocar tu consentimiento o limitar su uso. Puedes actualizar tu nombre, teléfono y punto de entrega desde <a href="/cuenta">Mi cuenta</a>.</p>
+  <p>Para cualquier otra solicitud, escríbenos por <a href="https://wa.me/{{ cfg.WHATSAPP }}?text={{ quote('Hola ReyBasar, quiero hacer una solicitud sobre mis datos personales') }}" target="_blank" rel="noopener">WhatsApp</a> o llámanos al {{ cfg.TELEFONO }}, indicando tu nombre, el correo de tu cuenta, qué derecho quieres ejercer y, en su caso, qué datos. Podremos pedirte que acredites tu identidad. Te responderemos en los plazos que establece la Ley.</p>
+  <p>Si consideras que tu derecho a la protección de datos fue vulnerado, puedes acudir a la Secretaría Anticorrupción y Buen Gobierno, autoridad en la materia.</p>
+
+  <h2>7. Cuánto tiempo guardamos tus datos</h2>
+  <p>Mientras tengas una cuenta activa o haya un pedido en curso, y después solo el tiempo necesario para cumplir obligaciones legales o fiscales.</p>
+
+  <h2>8. Cambios a este aviso</h2>
+  <p>Cualquier cambio se publicará en esta misma página, con la fecha de actualización arriba.</p>
+</section>
+{% endblock %}

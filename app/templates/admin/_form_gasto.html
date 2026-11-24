@@ -1,0 +1,12 @@
+{# Formulario de gasto. Variables: g (gasto a editar o None), volver #}
+<form method="post" action="/admin/gastos" class="form-gasto">
+  {% if g %}<input type="hidden" name="gid" value="{{ g.id }}">{% endif %}
+  <input type="hidden" name="volver" value="{{ volver }}">
+  <label class="crece">Concepto<input name="concepto" required value="{{ g.concepto if g else '' }}" placeholder="Ej. Pasajes a CDMX, servidor diciembre…"></label>
+  <label>Monto<input name="monto" type="number" min="1" step="1" required value="{{ g.monto if g else '' }}" placeholder="800"></label>
+  <label>Categoría<select name="categoria">{% for k, n in cats %}<option value="{{ k }}" {{ 'selected' if g and g.categoria == k }}>{{ n }}</option>{% endfor %}</select></label>
+  <label>Fecha<input name="fecha" type="date" value="{{ g.fecha.strftime('%Y-%m-%d') if g else hoy }}"></label>
+  <label class="crece">Nota <small>(opcional)</small><input name="nota" value="{{ g.nota if g else '' }}" placeholder="Ej. compra de mercancía en Tepito"></label>
+  <button class="btn-negro">{{ 'GUARDAR CAMBIOS' if g else 'AGREGAR GASTO' }}</button>
+  {% if g %}<a href="/admin/gastos" class="mini-link">cancelar</a>{% endif %}
+</form>

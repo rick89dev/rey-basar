@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="acceso">
+  <form method="post" action="/cuenta/registro" class="acceso-caja">
+    <h1>Crear cuenta</h1>
+    <p class="acceso-sub">Es gratis y tarda un minuto.</p>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <input type="hidden" name="siguiente" value="{{ siguiente }}">
+    <label>Nombre completo<input name="nombre" required autocomplete="name" value="{{ datos.nombre or '' }}"></label>
+    <label>Correo<input name="email" type="email" required autocomplete="email" value="{{ datos.email or '' }}"></label>
+    <label>WhatsApp (10 dígitos)<input name="telefono" required inputmode="tel" autocomplete="tel" value="{{ datos.telefono or '' }}" placeholder="777 123 4567"></label>
+    <label>Contraseña<input name="clave" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+    <label>Repite la contraseña<input name="clave2" type="password" required minlength="8" autocomplete="new-password"></label>
+    <label class="radio acepto"><input type="checkbox" name="acepto" value="1" required> <span>Acepto el <a href="/aviso-de-privacidad" target="_blank">Aviso de privacidad</a> y los <a href="/terminos-y-condiciones" target="_blank">Términos y condiciones</a></span></label>
+    <button class="btn-negro ancho">CREAR CUENTA</button>
+    <p class="acceso-pie">¿Ya tienes cuenta? <a href="/cuenta/entrar?siguiente={{ siguiente|urlencode }}">Inicia sesión</a></p>
+  </form>
+  <aside class="acceso-lado">
+    <h2>Entregas en {{ cfg.ENTREGA_CIUDAD }}</h2>
+    <p>Por ahora entregamos solo en {{ cfg.ENTREGA_CIUDAD }}. El lugar y la hora los acordamos contigo por WhatsApp.</p>
+  </aside>
+</section>
+{% endblock %}

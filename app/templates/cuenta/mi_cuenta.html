@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Mi cuenta · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="cuenta">
+  <div class="cuenta-cab">
+    <h1>Hola, {{ u.primer_nombre }}</h1>
+    <div>{% if u.es_admin %}<a href="/admin" class="btn-negro">IR AL ADMIN</a>{% endif %}
+      <a href="/cuenta/salir" class="btn-negro-borde">CERRAR SESIÓN</a></div>
+  </div>
+  {% if ok %}<p class="ok">Datos guardados ✓</p>{% endif %}
+  <div class="cuenta-in">
+    <div>
+      <h2 class="fila-t"><span>Mis pedidos</span></h2>
+      {% if pedidos %}
+      <ul class="lista-pedidos">
+        {% for p in pedidos %}
+        <li><a href="/cuenta/pedidos/{{ p.id }}">
+          <b>{{ p.folio }}</b><span>{{ p.creado.strftime('%d/%m/%Y') }} · {{ p.items|sum(attribute='cantidad') }} pieza(s)</span>
+          <span class="estado {{ p.estado }}">{{ p.estado_nombre }}</span><b>{{ p.total|pesos }}</b></a></li>
+        {% endfor %}
+      </ul>
+      {% else %}<p>Aún no tienes pedidos. <a href="/" class="subraya">Ver el catálogo</a></p>{% endif %}
+    </div>
+    <form method="post" action="/cuenta" class="cuenta-datos">
+      <h2 class="fila-t"><span>Mis datos</span></h2>
+      <label>Nombre<input name="nombre" value="{{ u.nombre }}" required></label>
+      <label>Correo<input value="{{ u.email }}" disabled></label>
+      <label>WhatsApp<input name="telefono" value="{{ u.telefono }}" inputmode="tel"></label>
+      <label>Punto de entrega preferido <small>(en {{ cfg.ENTREGA_CIUDAD }})</small><input name="direccion" value="{{ u.direccion }}" placeholder="Ej. Plaza Galerías, centro…"></label>
+      <button class="btn-negro">GUARDAR</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

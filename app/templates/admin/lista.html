@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+{% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
+
+<div class="res-cab"><h1>Productos</h1></div>
+{% if fin.sin_costo %}<p class="aviso-costo">⚠️ {{ fin.sin_costo }} producto(s) propio(s) sin costo capturado: no cuentan en tu inversión. <a href="/admin/productos?estado=sin_costo">Ver cuáles</a></p>{% endif %}
+
+<form class="ad-filtros">
+  <input name="q" value="{{ q }}" placeholder="Buscar nombre o RB-0001">
+  <select name="estado" onchange="this.form.submit()">
+    <option value="">Todos</option>
+    <option value="disponibles" {{ 'selected' if estado == 'disponibles' }}>Con piezas disponibles</option>
+    <option value="vendidos" {{ 'selected' if estado == 'vendidos' }}>Agotados (vendidos)</option>
+    <option value="ocultos" {{ 'selected' if estado == 'ocultos' }}>Ocultos</option>
+    <option value="consigna" {{ 'selected' if estado == 'consigna' }}>Consignación</option>
+    <option value="sin_costo" {{ 'selected' if estado == 'sin_costo' }}>Sin costo capturado</option>
+  </select>
+  <button class="btn-negro">Buscar</button>
+  <a href="/admin/nuevo" class="btn-negro-borde">+ Nuevo producto</a>
+</form>
+{% if productos %}
+<table class="ad-tabla">
+  <thead><tr><th></th><th>Producto</th><th>Pagué</th><th>Vendo a</th><th>Margen</th><th>Piezas</th><th>Invertido</th><th></th></tr></thead>
+  <tbody>
+  {% for p in productos %}
+  <tr class="{{ 'vendido' if p.vendido }} {{ 'oculto' if not p.visible }}">
+    <td><a href="/admin/producto/{{ p.id }}"><img src="{{ p.foto or '/static/img/conejo.png' }}" alt=""></a></td>
+    <td><a href="/admin/producto/{{ p.id }}"><b>{{ p.nombre }}</b></a><br><small>{{ p.sku }} · {{ p.categoria_nombre }}{% if p.subcategoria_nombre %} {{ p.subcategoria_nombre }}{% endif %} · {{ 'Nuevo' if p.condicion == 'nuevo' else 'Seminuevo' }}{% if p.talla %} · T. {{ p.talla }}{% endif %}</small>
+      {% if p.vendido %}<br><small class="tag">AGOTADO</small>{% elif p.apartado %}<br><small class="tag">APARTADO</small>{% elif not p.visible %}<br><small class="tag gris">OCULTO</small>{% endif %}
+      {% if p.origen == 'consigna' %}<br><small class="tag gris">CONSIGNACIÓN{% if p.vendedor %}: {{ p.vendedor }}{% endif %}</small>{% endif %}
+      {% if p.creado_por and p.creado_por not in ('admin', 'demo') %}<br><small>📱 {{ p.creado_por }}</small>{% endif %}</td>
+    <td>{% if p.origen == 'consigna' %}<small>—</small>{% elif p.costo is none %}<a href="/admin/producto/{{ p.id }}" class="falta">capturar</a>{% else %}{{ p.costo|pesos }}{% endif %}</td>
+    <td>{{ p.precio|pesos }}</td>
+    <td>{% if p.margen is not none and p.origen != 'consigna' %}<span class="{{ 'neg' if p.margen < 0 }}">{{ p.margen|pesos }}</span><br><small>{% if p.margen_pct is not none %}{{ p.margen_pct }}%{% else %}pieza sin costo{% endif %}</small>{% else %}<small>—</small>{% endif %}</td>
+    <td><b>{{ p.disponibles }}</b> de {{ p.piezas }}<br><small>{{ p.vendidas }} vendida(s){% if p.apartadas %} · {{ p.apartadas }} apartada(s){% endif %}</small></td>
+    <td>{{ p.invertido|pesos if p.invertido else '—' }}</td>
+    <td>{% if p.disponibles %}<form method="post" action="/admin/producto/{{ p.id }}/venta"><input type="hidden" name="volver" value="lista"><button class="mini" title="Registra 1 pieza vendida a {{ p.precio|pesos }}">Vender 1</button></form>
+      <a href="/admin/producto/{{ p.id }}#vender" class="mini-link">otro precio</a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="vacio"><img src="/static/img/conejo.png" alt=""><p>No hay productos {{ 'con ese filtro' if q or estado else 'todavía' }}.</p><a href="/admin/nuevo" class="btn-negro">+ NUEVO PRODUCTO</a></div>
+{% endif %}
+{% endblock %}

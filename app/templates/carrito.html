@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Carrito · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="carrito">
+  <h1>Tu carrito</h1>
+  <p id="cAviso" class="error" hidden></p>
+  <div id="carritoVacio" class="vacio" hidden>
+    <img src="/static/img/conejo.png" alt="">
+    <p>Tu carrito está vacío.</p>
+    <a href="/" class="btn-negro">SEGUIR COMPRANDO</a>
+  </div>
+  <div id="carritoLleno" class="carrito-in" hidden>
+    <ul id="carritoLista" class="carrito-lista"></ul>
+    <aside class="resumen">
+      <h2>Resumen</h2>
+      <p><span>Subtotal</span><b id="cSub"></b></p>
+      <p><span>Entrega</span><b id="cEnvio"></b></p>
+      <p class="total"><span>Total</span><b id="cTotal"></b></p>
+      {% if usuario %}
+      <form id="cForm" class="c-form">
+        <h3>Entrega</h3>
+        <label>Nombre<input name="nombre" required value="{{ usuario.nombre }}" autocomplete="name"></label>
+        <label>WhatsApp<input name="telefono" required inputmode="tel" value="{{ usuario.telefono }}" autocomplete="tel"></label>
+        <p class="c-entrega">📍 <b>Entregas solo en {{ cfg.ENTREGA_CIUDAD }}.</b> El lugar y la hora de entrega los acordamos contigo por WhatsApp.</p>
+        <div id="cZona">
+          <label>Punto de entrega que te queda bien <small>(opcional)</small><input name="direccion" value="{{ usuario.direccion }}" placeholder="Ej. Plaza Galerías, centro, cerca de mi trabajo…"></label>
+          <label>Notas <small>(opcional)</small><textarea name="notas" rows="2" placeholder="Días u horario que te acomodan, forma de pago…"></textarea></label>
+          <button class="btn-negro ancho" id="cEnviar">HACER PEDIDO</button>
+          <small>Apartamos tus piezas y te contactamos por WhatsApp para acordar entrega y pago. Al pedir aceptas los <a class="subraya" href="/terminos-y-condiciones" target="_blank">Términos y condiciones</a>.</small>
+        </div>
+      </form>
+      {% else %}
+      <div class="c-login">
+        <p><b>Inicia sesión para hacer tu pedido.</b> Así apartamos tus piezas y guardamos tu dirección.</p>
+        <a href="/cuenta/entrar?siguiente=/carrito" class="btn-negro ancho">INICIAR SESIÓN</a>
+        <a href="/cuenta/registro?siguiente=/carrito" class="btn-negro-borde ancho">CREAR CUENTA</a>
+        <small>Entregamos solo en {{ cfg.ENTREGA_CIUDAD }}; el punto de entrega lo acordamos contigo.</small>
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>RB.pintarCarrito({costo: {{ cfg.ENTREGA_COSTO }}, gratisDesde: {{ cfg.ENTREGA_GRATIS_DESDE }}, wa: "{{ cfg.WHATSAPP }}"});</script>
+{% endblock %}

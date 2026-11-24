@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido {{ p.folio }} · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="cuenta">
+  {% if nuevo %}
+  <div class="pedido-ok">
+    <h1>¡Pedido recibido! <small>{{ p.folio }}</small></h1>
+    <p>Apartamos tus piezas. Para confirmarlo y acordar la entrega y el pago, mándanos tu pedido por WhatsApp:</p>
+    <a href="{{ wa }}" target="_blank" rel="noopener" class="btn-wa">ENVIAR PEDIDO POR WHATSAPP</a>
+  </div>
+  {% else %}
+  <div class="migas"><a href="/cuenta">Mi cuenta</a> › Pedido {{ p.folio }}</div>
+  <h1>Pedido {{ p.folio }} <span class="estado {{ p.estado }}">{{ p.estado_nombre }}</span> {% if p.pagado %}<span class="estado pagado">Pagado</span>{% endif %}</h1>
+  {% endif %}
+  <div class="pedido-in">
+    <ul class="carrito-lista">
+      {% for i in p.items %}
+      <li><img src="{{ i.foto or '/static/img/conejo.png' }}" alt=""><div><b>{{ i.nombre }}</b><small>{{ i.sku }}{% if i.talla %} · Talla {{ i.talla }}{% endif %}</small></div><b>{% if i.cantidad > 1 %}<small>{{ i.cantidad }} × {{ i.precio|pesos }}</small><br>{% endif %}{{ i.total|pesos }}</b></li>
+      {% endfor %}
+    </ul>
+    <aside class="resumen">
+      <h2>Resumen</h2>
+      <p><span>Subtotal</span><b>{{ p.subtotal|pesos }}</b></p>
+      <p><span>Entrega</span><b>{% if p.envio %}{{ p.envio|pesos }}{% elif cfg.ENTREGA_COSTO %}Gratis{% else %}Por acordar{% endif %}</b></p>
+      <p class="total"><span>Total</span><b>{{ p.total|pesos }}</b></p>
+      <h3>Entrega</h3>
+      <small>{{ p.nombre }} · {{ p.telefono }}<br>{{ p.municipio }}{% if p.direccion %} · punto preferido: {{ p.direccion }}{% endif %}<br>El lugar y la hora se acuerdan por WhatsApp.</small>
+      {% if not nuevo %}<a href="{{ wa }}" target="_blank" rel="noopener" class="btn-wa ancho">ESCRIBIR POR WHATSAPP</a>{% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<h1>Usuarios</h1>
+<p class="ad-ayuda">Para dar de alta un administrador: la persona crea su cuenta en <b>/cuenta/registro</b> y aquí la haces <b>Admin</b>.</p>
+<form class="ad-filtros"><input name="q" value="{{ q }}" placeholder="Buscar nombre, correo o teléfono"><button class="btn-negro">Buscar</button></form>
+<table class="ad-tabla">
+  <thead><tr><th>Nombre</th><th>Contacto</th><th>Rol</th><th>Pedidos</th><th>Alta</th><th></th></tr></thead>
+  <tbody>
+  {% for u in usuarios %}
+  <tr class="{{ 'oculto' if not u.activo }}">
+    <td><b>{{ u.nombre }}</b>{% if u.id == yo.id %} <small>(tú)</small>{% endif %}{% if not u.activo %}<br><small class="tag gris">DESACTIVADO</small>{% endif %}</td>
+    <td>{{ u.email }}<br><small>{{ u.telefono }}</small></td>
+    <td>{% if u.es_admin %}<span class="tag">ADMIN</span>{% else %}Cliente{% endif %}</td>
+    <td>{{ pedidos_por.get(u.id, 0) }}</td>
+    <td>{{ u.creado.strftime('%d/%m/%Y') }}</td>
+    <td class="acciones">
+      {% if u.id != yo.id %}
+      <form method="post" action="/admin/usuarios/{{ u.id }}/rol"><button class="mini" name="rol" value="{{ 'cliente' if u.es_admin else 'admin' }}">{{ 'Quitar admin' if u.es_admin else 'Hacer admin' }}</button></form>
+      <form method="post" action="/admin/usuarios/{{ u.id }}/activo"><button class="mini {{ '' if not u.activo else 'rojo' }}">{{ 'Activar' if not u.activo else 'Desactivar' }}</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

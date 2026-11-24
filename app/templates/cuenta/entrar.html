@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="acceso">
+  <form method="post" action="/cuenta/entrar" class="acceso-caja">
+    <h1>Iniciar sesión</h1>
+    <p class="acceso-sub">Clientes y administradores entran aquí.</p>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <input type="hidden" name="siguiente" value="{{ siguiente }}">
+    <label>Correo<input name="email" type="email" required autocomplete="email" value="{{ email }}"></label>
+    <label>Contraseña<input name="clave" type="password" required autocomplete="current-password"></label>
+    <button class="btn-negro ancho">ENTRAR</button>
+    <p class="acceso-pie">¿No tienes cuenta? <a href="/cuenta/registro?siguiente={{ siguiente|urlencode }}">Crea una aquí</a></p>
+    <p class="acceso-pie"><small>¿Olvidaste tu contraseña? <a href="https://wa.me/{{ cfg.WHATSAPP }}?text={{ quote('Hola ReyBasar, olvidé la contraseña de mi cuenta') }}" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></small></p>
+  </form>
+  <aside class="acceso-lado">
+    <h2>Con tu cuenta puedes</h2>
+    <ul>
+      <li>Apartar piezas únicas al hacer tu pedido</li>
+      <li>Guardar tu dirección de entrega</li>
+      <li>Ver el estado de tus pedidos</li>
+    </ul>
+  </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block titulo %}Términos y condiciones · ReyBasar{% endblock %}
+{% block contenido %}
+<section class="legal">
+  <h1>Términos y condiciones</h1>
+  <p class="legal-fecha">Última actualización: {{ cfg.ACTUALIZACION_LEGAL }}</p>
+  <p>Al usar este sitio, crear una cuenta o hacer un pedido aceptas estos términos. Si no estás de acuerdo, por favor no uses el sitio.</p>
+
+  <h2>1. Quiénes somos</h2>
+  <p>ReyBasar vende ropa, calzado, juguetes y accesorios <b>nuevos y seminuevos</b>. Contacto: <a href="https://wa.me/{{ cfg.WHATSAPP }}" target="_blank" rel="noopener">WhatsApp</a> o al {{ cfg.TELEFONO }}.</p>
+
+  <h2>2. Productos</h2>
+  <ul>
+    <li><b>Nuevo:</b> pieza sin uso. <b>Seminuevo:</b> pieza usada, revisada y limpia; si tiene algún detalle lo indicamos en su descripción.</li>
+    <li>Muchas piezas son <b>únicas</b> o hay pocas: la disponibilidad que ves en el sitio puede cambiar en cualquier momento.</li>
+    <li>Las fotos son de la pieza real, pero los colores pueden verse distintos según tu pantalla. Las tallas son las de la etiqueta; si tienes dudas, pregúntanos antes de pedir.</li>
+  </ul>
+
+  <h2>3. Precios</h2>
+  <p>Los precios están en pesos mexicanos. Se respeta el precio publicado al momento de hacer tu pedido. El costo de entrega, si aplica, se te informa antes de confirmar.</p>
+
+  <h2>4. Tu cuenta</h2>
+  <p>Para pedir necesitas una cuenta con datos verdaderos. Eres responsable de cuidar tu contraseña y de lo que se haga con tu cuenta. Podemos suspender cuentas con datos falsos o uso indebido.</p>
+
+  <h2>5. Pedidos</h2>
+  <ul>
+    <li>Al hacer tu pedido <b>apartamos</b> las piezas y te contactamos por WhatsApp para confirmar entrega y pago.</li>
+    <li>El pedido queda confirmado cuando acordamos contigo la entrega y la forma de pago.</li>
+    <li>Si no logramos confirmar tu pedido en <b>48 horas</b>, podemos cancelarlo y liberar las piezas.</li>
+    <li>Si una pieza resulta no disponible o con un detalle no descrito, te avisamos y puedes cancelarla sin costo.</li>
+  </ul>
+
+  <h2>6. Pago</h2>
+  <p>Aceptamos transferencia, depósito o efectivo contra entrega, según lo que acordemos por WhatsApp. El sitio no procesa pagos con tarjeta ni guarda datos bancarios.</p>
+
+  <h2>7. Entregas</h2>
+  <ul>
+    <li>Por ahora entregamos <b>solo en {{ cfg.ENTREGA_CIUDAD }}</b>. No hacemos envíos a otras ciudades.</li>
+    <li>El lugar, día y horario de entrega se acuerdan contigo por WhatsApp. Revisa tu pedido al recibirlo.</li>
+  </ul>
+
+  <h2>8. Cambios y devoluciones</h2>
+  <ul>
+    <li>Si la pieza no corresponde a su descripción o fotos, avísanos dentro de los <b>3 días</b> siguientes a recibirla y te ofrecemos cambio o reembolso.</li>
+    <li>La pieza debe regresar en el mismo estado en que la recibiste.</li>
+    <li>No hay devoluciones por cambio de opinión en ropa interior, trajes de baño ni piezas con descuento final, salvo que tengan un defecto no descrito.</li>
+  </ul>
+
+  <h2>9. Vender con ReyBasar</h2>
+  <ul>
+    <li>Puedes ofrecernos piezas <b>a consignación</b> (recibes un porcentaje del precio de venta cuando se vende) o en <b>compra directa</b> (te pagamos al momento un porcentaje menor). Los porcentajes vigentes están en <a href="/quiero-vender">Quiero vender</a>.</li>
+    <li>Revisamos cada pieza y podemos no aceptarla. El precio de venta lo definimos de común acuerdo.</li>
+    <li>Las condiciones particulares (tiempo en exhibición, recolección de piezas no vendidas y forma de pago) se acuerdan contigo por escrito al recibir tus piezas.</li>
+  </ul>
+
+  <h2>10. Uso del sitio</h2>
+  <p>El logotipo, nombre, fotos y textos de ReyBasar no pueden usarse sin autorización. No está permitido usar el sitio para fines ilícitos ni intentar afectar su funcionamiento.</p>
+
+  <h2>11. Responsabilidad</h2>
+  <p>Hacemos lo posible porque la información del sitio sea correcta y esté disponible, pero puede haber errores o interrupciones. Si un precio aparece con un error evidente, te avisaremos antes de confirmar tu pedido.</p>
+
+  <h2>12. Datos personales</h2>
+  <p>El uso de tus datos se rige por nuestro <a href="/aviso-de-privacidad">Aviso de privacidad</a>.</p>
+
+  <h2>13. Leyes aplicables</h2>
+  <p>Estos términos se rigen por las leyes de México, incluida la Ley Federal de Protección al Consumidor. Si tienes una queja que no resolvamos contigo, puedes acudir a la Procuraduría Federal del Consumidor (Profeco).</p>
+
+  <h2>14. Cambios</h2>
+  <p>Podemos actualizar estos términos; la versión vigente es la publicada en esta página. Los pedidos ya hechos se rigen por los términos vigentes al momento de hacerlos.</p>
+</section>
+{% endblock %}

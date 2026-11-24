@@ -1,0 +1,146 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<a href="/admin/productos" class="volver">‹ Productos</a>
+<h1>{% if p %}{{ p.sku }} · {{ p.nombre }}{% else %}Nuevo producto{% endif %}</h1>
+{% if ok == 'venta' %}<p class="ok">Venta registrada ✓</p>
+{% elif ok == 'devolucion' %}<p class="ok">Devolución registrada ✓ La pieza regresó al inventario.</p>
+{% elif ok %}<p class="ok">Guardado ✓ {% if p and p.visible %}<a href="/producto/{{ p.slug }}" target="_blank">Ver en la tienda</a>{% endif %}</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if p %}
+{% set ns = namespace(cobrado=0, recuperado=0, ganancia=0) %}
+{% for v in ventas %}{% set ns.cobrado = ns.cobrado + v.total %}{% if v.origen_producto != 'consigna' %}{% set ns.recuperado = ns.recuperado + (v.costo_unitario or 0) * v.cantidad %}{% set ns.ganancia = ns.ganancia + (v.ganancia or 0) %}{% endif %}{% endfor %}
+<section class="finanzas finanzas-prod">
+  <div class="fz-tarjeta"><small>Piezas</small><b>{{ p.disponibles }} <em>de {{ p.piezas }}</em></b><span>{{ p.vendidas }} vendida(s){% if p.apartadas %} · {{ p.apartadas }} apartada(s){% endif %}</span></div>
+  <div class="fz-tarjeta"><small>Invertido</small><b>{{ p.invertido|pesos }}</b><span>{% if p.origen == 'consigna' %}consignación: no pagaste{% elif p.costo is none %}falta el costo{% else %}{{ p.piezas }} × {{ p.costo|pesos }}{% endif %}</span></div>
+  <div class="fz-tarjeta"><small>Cobrado</small><b>{{ ns.cobrado|pesos }}</b><span>en {{ p.vendidas }} pieza(s)</span></div>
+  <div class="fz-tarjeta"><small>Recuperado</small><b>{{ ns.recuperado|pesos }}</b><span>de lo que pagaste</span></div>
+  <div class="fz-tarjeta {{ 'verde' if ns.ganancia > 0 }}"><small>Ganancia</small><b>{{ ns.ganancia|pesos }}</b><span>sobre lo vendido</span></div>
+  <div class="fz-tarjeta"><small>Por recuperar</small><b>{{ (p.invertido - ns.recuperado)|pesos }}</b><span>en {{ p.en_existencia }} pieza(s) sin vender</span></div>
+</section>
+{% endif %}
+
+{% if p and p.fotos %}
+<div class="ad-fotos">
+  {% for f in p.fotos %}
+  <figure>
+    <img src="{{ f.url }}" alt="">
+    <figcaption>
+      {% if loop.first %}<span class="tag">Principal</span>{% else %}
+      <form method="post" action="/admin/foto/{{ f.id }}/principal"><button class="mini">Hacer principal</button></form>{% endif %}
+      <form method="post" action="/admin/foto/{{ f.id }}/quitar" onsubmit="return confirm('¿Quitar esta foto?')"><button class="mini rojo">Quitar</button></form>
+    </figcaption>
+  </figure>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="ad-form">
+  <div class="ancho ia-caja">
+    <b>✨ {% if p %}Agregar fotos{% else %}Sube las fotos y la IA llena la ficha{% endif %}</b>
+    <label>Fotos<input type="file" name="fotos" id="fFotos" accept="image/*" multiple></label>
+    <div class="ia-miniaturas" id="iaMinis"></div>
+    <label>Lo que sabes de la pieza <small>(opcional: precio, lo que pagaste, talla, marca, estado, cuántas tienes)</small>
+      <textarea id="iaTexto" rows="2" placeholder="Ej. pagué 100, la vendo en 250, talla M, Zara, nueva con etiqueta, tengo 3"></textarea></label>
+    <div class="ia-acciones">
+      <button type="button" class="btn-negro" id="iaBoton">✨ LLENAR CON IA</button>
+      <span id="iaEstado" class="ia-estado">{% if p %}Al elegir fotos nuevas puedes volver a llenar la ficha con IA.{% else %}Al elegir las fotos la IA llena los campos. Revisa y guarda.{% endif %}</span>
+    </div>
+  </div>
+  <label class="ancho">Nombre<input name="nombre" required value="{{ p.nombre if p else '' }}" placeholder="Ej. Chamarra de mezclilla Levi's"></label>
+  <label>Categoría<select name="categoria">{% for k, n in CATEGORIAS %}<option value="{{ k }}" {{ 'selected' if p and p.categoria == k }}>{{ n }}</option>{% endfor %}</select></label>
+  <label id="campoSub">Para<select name="subcategoria" id="fSub"><option value="">—</option>{% for k, n in SUBCATEGORIAS.deportes %}<option value="{{ k }}" {{ 'selected' if p and p.subcategoria == k }}>{{ n }}</option>{% endfor %}</select></label>
+  <label>Estado<select name="condicion">{% for k, n in cfg.CONDICIONES %}<option value="{{ k }}" {{ 'selected' if p and p.condicion == k }}>{{ n if k == 'nuevo' else 'Seminuevo' }}</option>{% endfor %}</select></label>
+  <label>Talla<input name="talla" value="{{ p.talla if p else '' }}" placeholder="M, 10, 25 MX…"></label>
+  <label>Marca<input name="marca" value="{{ p.marca if p else '' }}"></label>
+  <fieldset class="ancho precios">
+    <legend>Precio e inventario</legend>
+    <label>Origen<select name="origen" id="origen">{% for k, n in cfg.ORIGENES %}<option value="{{ k }}" {{ 'selected' if p and p.origen == k }}>{{ n }}</option>{% endfor %}</select></label>
+    <label id="campoCosto">Pagué por pieza<input name="costo" id="fCosto" type="number" min="0" value="{{ p.costo if p and p.costo is not none else '' }}" placeholder="Ej. 100"></label>
+    <label>Precio de venta<input name="precio" id="fPrecio" type="number" min="0" required value="{{ p.precio if p else '' }}" placeholder="Ej. 200"></label>
+    <label>Piezas compradas<input name="piezas" id="fPiezas" type="number" min="1" required value="{{ p.piezas if p else 1 }}"></label>
+    <label>Precio anterior <small>(para mostrar descuento)</small><input name="precio_antes" type="number" min="0" value="{{ p.precio_antes if p and p.precio_antes else '' }}" placeholder="opcional"></label>
+    <label id="campoVendedor">Vendedor (consignación)<input name="vendedor" value="{{ p.vendedor if p else '' }}" placeholder="Nombre y teléfono"></label>
+    <div class="calc-margen" id="calcMargen"></div>
+  </fieldset>
+  <label class="ancho">Descripción<textarea name="descripcion" rows="4">{{ p.descripcion if p else '' }}</textarea></label>
+  <div class="ancho checks">
+    <label class="radio"><input type="checkbox" name="visible" value="1" {{ 'checked' if not p or p.visible }}> Visible en la tienda</label>
+    <label class="radio"><input type="checkbox" name="destacado" value="1" {{ 'checked' if p and p.destacado }}> Destacado (portada)</label>
+  </div>
+  <button class="btn-negro">GUARDAR</button>
+</form>
+{% if p %}
+<section class="ventas" id="ventas">
+  <h2>Ventas</h2>
+  {% if p.disponibles %}
+  <form method="post" action="/admin/producto/{{ p.id }}/venta" class="form-venta" id="vender">
+    <b>Registrar venta</b>
+    <label>Piezas<input name="cantidad" type="number" min="1" max="{{ p.disponibles }}" value="1"></label>
+    <label>Precio por pieza<input name="precio" type="number" min="0" value="{{ p.precio }}"></label>
+    <label class="crece">Nota<input name="nota" placeholder="Ej. venta en bazar, cliente Juan…"></label>
+    <button class="btn-negro">REGISTRAR</button>
+  </form>
+  {% else %}<p class="ad-ayuda">{% if p.vendido %}Ya vendiste todas las piezas.{% else %}Las piezas restantes están apartadas en pedidos.{% endif %} Si compraste más, aumenta “Piezas compradas”.</p>{% endif %}
+  {% if ventas %}
+  <ul class="vf-lista">
+    {% for v in ventas %}{% with volver='producto', mostrar_producto=false %}{% include "admin/_venta_fila.html" %}{% endwith %}{% endfor %}
+  </ul>
+  {% else %}<p>Aún no hay ventas de este producto.</p>{% endif %}
+</section>
+
+<form method="post" action="/admin/producto/{{ p.id }}/eliminar" onsubmit="return confirm('¿Eliminar {{ p.sku }} y sus fotos? No se puede deshacer.')" class="ad-eliminar">
+  <button class="mini rojo">Eliminar producto</button>
+</form>
+{% endif %}
+<script>
+const $=id=>document.getElementById(id), o=$('origen');
+const pesos=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('es-MX');
+function calc(){
+  const consigna=o.value==='consigna';
+  $('campoVendedor').style.display=consigna?'':'none';
+  $('campoCosto').style.display=consigna?'none':'';
+  const c=parseFloat($('fCosto').value), pr=parseFloat($('fPrecio').value), n=parseInt($('fPiezas').value)||1, out=$('calcMargen');
+  if(consigna){out.innerHTML='Consignación: no cuenta como inversión.';return;}
+  if(isNaN(c)||isNaN(pr)){out.innerHTML='Captura lo que pagaste y el precio de venta para ver tu margen.';return;}
+  const m=pr-c, pct=c?Math.round(100*m/c):0;
+  out.innerHTML=`<span>Margen por pieza: <b class="${m<0?'neg':''}">${pesos(m)}</b>${c?` (${pct}%)`:''}</span>`+
+    `<span>Inviertes: <b>${pesos(c*n)}</b> en ${n} pieza(s)</span>`+
+    `<span>Si vendes todas: cobras <b>${pesos(pr*n)}</b> y ganas <b class="${m<0?'neg':''}">${pesos(m*n)}</b></span>`;
+}
+['origen','fCosto','fPrecio','fPiezas'].forEach(i=>$(i).addEventListener('input',calc));calc();
+const fCat=document.querySelector('[name=categoria]'), SUBS={{ SUBCATEGORIAS|tojson }};
+function subcat(){ const tiene=!!SUBS[fCat.value]; $('campoSub').style.display=tiene?'':'none'; if(!tiene) $('fSub').value=''; }
+fCat.addEventListener('change',subcat); subcat();
+
+// ── Llenar con IA ──
+const fotos=$('fFotos'), boton=$('iaBoton'), estado=$('iaEstado'), form=fotos.form, nuevo={{ 'false' if p else 'true' }};
+function poner(nombre, valor){
+  if(valor===null||valor===undefined||valor==='') return;
+  const el=form.querySelector(`[name="${nombre}"]`); if(!el) return;
+  el.value=valor; el.classList.remove('ia-llenado'); void el.offsetWidth; el.classList.add('ia-llenado');
+}
+async function llenarIA(){
+  if(!fotos.files.length){ estado.textContent='Primero elige al menos una foto.'; return; }
+  const fd=new FormData(); [...fotos.files].slice(0,6).forEach(f=>fd.append('fotos',f)); fd.append('texto',$('iaTexto').value);
+  boton.disabled=true; boton.textContent='✨ LEYENDO FOTOS…'; estado.textContent='La IA está viendo las fotos (unos segundos)…';
+  try{
+    const r=await fetch('/admin/ia/ficha',{method:'POST',body:fd}); const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    poner('nombre',d.nombre); poner('descripcion',d.descripcion); poner('categoria',d.categoria); subcat(); poner('subcategoria',d.subcategoria);
+    poner('condicion',d.condicion); poner('talla',d.talla); poner('marca',d.marca);
+    if(d.costo!==null){ $('origen').value='propio'; poner('costo',d.costo); }
+    poner('precio',d.precio); poner('piezas',d.piezas); calc();
+    const falta=[]; if(d.precio===null&&!$('fPrecio').value) falta.push('precio de venta'); if(d.costo===null&&!$('fCosto').value) falta.push('lo que pagaste');
+    estado.innerHTML='✓ Listo. Los campos en amarillo los llenó la IA: revísalos.'+(falta.length?` <b>Falta: ${falta.join(' y ')}.</b>`:'')+' Luego pica <b>GUARDAR</b>.';
+  }catch(e){ estado.textContent='⚠️ '+e.message; }
+  boton.disabled=false; boton.textContent='✨ VOLVER A LLENAR CON IA';
+}
+fotos.addEventListener('change',()=>{
+  $('iaMinis').innerHTML=[...fotos.files].slice(0,10).map(f=>`<img src="${URL.createObjectURL(f)}" alt="">`).join('');
+  if(fotos.files.length && nuevo) llenarIA();
+  else if(fotos.files.length) estado.textContent='Fotos listas. Pica “Llenar con IA” si quieres que vuelva a escribir la ficha.';
+});
+boton.addEventListener('click',llenarIA);
+</script>
+{% endblock %}

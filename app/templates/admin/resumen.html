@@ -1,0 +1,64 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+{% if request.query_params.get('bienvenida') %}<p class="ok">¡Listo! Tu cuenta es de <b>administrador</b> (fuiste el primero en registrarte). Los demás que se registren serán clientes; desde <a href="/admin/usuarios">Usuarios</a> puedes hacer admin a quien quieras.</p>{% endif %}
+{% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
+{% if request.query_params.get('ok') == 'gasto' %}<p class="ok">Gasto registrado ✓ Ya cuenta en tu inversión.</p>{% endif %}
+{% if request.query_params.get('ok') == 'devolucion' %}<p class="ok">Devolución registrada ✓ La pieza regresó al inventario.</p>{% endif %}
+
+<div class="res-cab">
+  <h1>Resumen de cuentas</h1>
+  <div class="res-acciones"><a href="/admin/nuevo" class="btn-negro">+ PRODUCTO</a><a href="#nuevo-gasto" class="btn-negro-borde" onclick="document.getElementById('nuevo-gasto').open=true">+ GASTO</a></div>
+</div>
+
+<section class="balance-grande {{ 'rojo' if fin.balance < 0 else 'verde' }}">
+  <small>Balance</small>
+  <b>{{ '−' if fin.balance < 0 }}{{ (fin.balance|abs)|pesos }}</b>
+  <p>{% if not fin.inversion and not fin.ventas %}Captura lo que pagaste por tus productos para empezar.
+     {% elif fin.balance < 0 %}Vas en números rojos: te falta vender <b>{{ (fin.balance|abs)|pesos }}</b> para recuperar toda tu inversión (mercancía y gastos).
+     {% else %}¡Ya recuperaste tu inversión y vas ganando <b>{{ fin.balance|pesos }}</b>!{% endif %}</p>
+  {% if fin.inversion %}
+  <div class="fz-barra grande"><i style="width:{{ [fin.recuperado_pct, 100]|min }}%"></i></div>
+  <span>Tus ventas ya cubren el {{ fin.recuperado_pct }}% de lo que has invertido</span>
+  {% endif %}
+</section>
+
+<details class="res-bloque gasto-rapido" id="nuevo-gasto">
+  <summary><b>+ Registrar un gasto</b> <small>servidor, licencias, pasajes…</small></summary>
+  {% with g=none, volver='resumen' %}{% include "admin/_form_gasto.html" %}{% endwith %}
+</details>
+
+<section class="finanzas finanzas-res">
+  <div class="fz-tarjeta"><small>Inversión total</small><b>{{ fin.inversion|pesos }}</b><span>mercancía {{ fin.mercancia|pesos }} + gastos {{ fin.gastos|pesos }}</span></div>
+  <div class="fz-tarjeta"><small>Ventas</small><b>{{ fin.ventas|pesos }}</b><span>{{ fin.piezas_vendidas }} pieza(s){% if fin.ventas_consigna %} · {{ fin.ventas_consigna|pesos }} de consignación{% endif %}{% if fin.devoluciones %} · ya descontadas {{ fin.devoluciones|pesos }} en devoluciones{% endif %}</span></div>
+  <div class="fz-tarjeta"><small>Recuperado</small><b>{{ fin.recuperado|pesos }}</b><span>de lo que pagaste por las piezas vendidas</span></div>
+  <div class="fz-tarjeta {{ 'verde' if fin.ganancia > 0 }}"><small>Ganancia en ventas</small><b>{{ fin.ganancia|pesos }}</b><span>lo cobrado por encima del costo de las piezas</span></div>
+  <div class="fz-tarjeta {{ 'verde' if fin.ganancia_neta > 0 else ('rojo' if fin.ganancia_neta < 0) }}"><small>Ganancia neta</small><b>{{ '−' if fin.ganancia_neta < 0 }}{{ (fin.ganancia_neta|abs)|pesos }}</b><span>ganancia en ventas − gastos</span></div>
+  <div class="fz-tarjeta"><small>En mercancía</small><b>{{ fin.por_recuperar|pesos }}</b><span>por recuperar en {{ fin.piezas_existencia }} pieza(s) sin vender</span></div>
+  <a class="fz-tarjeta" href="/admin/gastos"><small>Gastos de operación</small><b>{{ fin.gastos|pesos }}</b><span>ver detalle ›</span></a>
+</section>
+{% if fin.pedidos_por_cobrar %}<p class="aviso-cobro">💰 Tienes <b>{{ fin.por_cobrar|pesos }}</b> por cobrar en {{ fin.pedidos_por_cobrar }} pedido(s). <a href="/admin/pedidos?estado=por_cobrar">Registrar pagos ›</a></p>{% endif %}
+{% if fin.sin_costo %}<p class="aviso-costo">⚠️ {{ fin.sin_costo }} producto(s) sin costo capturado: no cuentan en tu inversión. <a href="/admin/productos?estado=sin_costo">Capturar</a></p>{% endif %}
+
+<div class="res-cols">
+  <section class="res-bloque">
+    <h2>Pedidos por atender {% if por_atender %}<span class="contador">{{ por_atender|length }}</span>{% endif %}</h2>
+    {% if por_atender %}
+    <ul class="res-lista">
+      {% for p in por_atender %}
+      <li><a href="/admin/pedidos/{{ p.id }}"><span><b>{{ p.folio }}</b> · {{ p.nombre }}<br><small>{{ p.direccion or 'punto por acordar' }} · {{ p.items|sum(attribute='cantidad') }} pieza(s)</small></span>
+        <span class="der"><b>{{ p.total|pesos }}</b><br><span class="estado {{ p.estado }}">{{ p.estado_nombre }}</span></span></a></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="res-vacio">No hay pedidos pendientes.</p>{% endif %}
+  </section>
+
+  <section class="res-bloque" id="ventas">
+    <h2>Últimas ventas</h2>
+    {% if ventas %}
+    <ul class="vf-lista">
+      {% for v in ventas %}{% with volver='resumen', mostrar_producto=true %}{% include "admin/_venta_fila.html" %}{% endwith %}{% endfor %}
+    </ul>
+    {% else %}<p class="res-vacio">Aún no registras ventas. Desde <a href="/admin/productos">Productos</a> usa “Vender 1” o entra a un producto.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

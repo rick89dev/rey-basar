@@ -1,0 +1,19 @@
+{# Acciones de una venta: devolución y deshacer. Requiere v y volver #}
+{% if v.es_devolucion %}
+  <form method="post" action="/admin/venta/{{ v.id }}/borrar" onsubmit="return confirm('¿Deshacer esta devolución? Las piezas vuelven a contar como vendidas.')"><input type="hidden" name="volver" value="{{ volver }}"><button class="mini">Deshacer</button></form>
+{% else %}
+  {% if v.devolvibles %}
+  <details class="devolver">
+    <summary class="mini">Devolución</summary>
+    <form method="post" action="/admin/venta/{{ v.id }}/devolucion">
+      <input type="hidden" name="volver" value="{{ volver }}">
+      <label>Piezas<input name="cantidad" type="number" min="1" max="{{ v.devolvibles }}" value="1"></label>
+      <label>Devolví por pieza<input name="monto" type="number" min="0" value="{{ v.precio_unitario }}"></label>
+      <label class="crece">Motivo<input name="nota" placeholder="Ej. no le quedó"></label>
+      <button class="btn-negro">REGISTRAR DEVOLUCIÓN</button>
+      <small>La pieza regresa al inventario y se descuenta de tus ventas.</small>
+    </form>
+  </details>
+  {% endif %}
+  {% if not v.pedido_id %}<form method="post" action="/admin/venta/{{ v.id }}/borrar" onsubmit="return confirm('¿Borrar esta venta? Úsalo solo si la capturaste por error.')"><input type="hidden" name="volver" value="{{ volver }}"><button class="mini rojo" title="Solo si la capturaste por error">Borrar</button></form>{% endif %}
+{% endif %}

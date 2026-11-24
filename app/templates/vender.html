@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block titulo %}Quiero vender · ReyBasar{% endblock %}
+{% block meta %}Vende tu ropa y juguetes nuevos o seminuevos con ReyBasar: a consignación o te los compramos hoy.{% endblock %}
+{% block contenido %}
+<section class="v-hero">
+  <div>
+    <h1>¿Quieres vender?</h1>
+    <p>Dale una segunda vida a la ropa y juguetes que ya no usas. Nosotros les tomamos fotos profesionales, los publicamos y los vendemos por ti.</p>
+    <a href="#formulario" class="btn-blanco">QUIERO VENDER</a>
+  </div>
+</section>
+
+<section class="v-opciones">
+  <h2 class="fila-t centro"><span>Elige cómo vender</span></h2>
+  <div class="v-cards">
+    <article class="v-card">
+      <span class="v-tag">Recibes más</span>
+      <h3>A consignación</h3>
+      <p class="v-pct">{{ cfg.CONSIGNA_PCT }}%</p>
+      <p class="v-sub">del precio de venta, cuando se vende</p>
+      <ul>
+        <li>Tus piezas siguen siendo tuyas hasta que se venden</li>
+        <li>Nosotros ponemos fotos, publicación y atención al cliente</li>
+        <li>Te avisamos por WhatsApp cada vez que se vende algo</li>
+        <li>Puedes recoger lo que no se venda</li>
+      </ul>
+    </article>
+    <article class="v-card oscura">
+      <span class="v-tag">Dinero hoy</span>
+      <h3>Te lo compramos</h3>
+      <p class="v-pct">{{ cfg.COMPRA_DIRECTA_PCT }}%</p>
+      <p class="v-sub">del precio de venta estimado, pagado al momento</p>
+      <ul>
+        <li>Pago inmediato, sin esperar a que se venda</li>
+        <li>Revisamos las piezas y te hacemos una oferta</li>
+        <li>Ideal si quieres vaciar tu clóset rápido</li>
+        <li>Sin trámites ni comisiones extra</li>
+      </ul>
+    </article>
+  </div>
+
+  <div class="calc">
+    <label>Si tu pieza se vende en <span>$</span><input id="calcPrecio" type="number" min="0" step="10" value="300"></label>
+    <div class="calc-res">
+      <p>A consignación recibes <b id="calcC"></b></p>
+      <p>Si te la compramos hoy recibes <b id="calcD"></b></p>
+    </div>
+  </div>
+</section>
+
+<section class="v-pasos">
+  <h2 class="fila-t centro"><span>¿Cómo funciona?</span></h2>
+  <ol>
+    <li><b>1</b><h4>Cuéntanos qué tienes</h4><p>Llena el formulario o mándanos fotos por WhatsApp.</p></li>
+    <li><b>2</b><h4>Revisamos tus piezas</h4><p>Te decimos cuáles aceptamos y en cuánto se pueden vender.</p></li>
+    <li><b>3</b><h4>Elige la opción</h4><p>Consignación o compra directa, tú decides.</p></li>
+    <li><b>4</b><h4>Recibe tu dinero</h4><p>Hoy mismo o cuando se venda, por transferencia o efectivo.</p></li>
+  </ol>
+  <div class="v-acepta">
+    <div><h4>Sí aceptamos</h4><p>Ropa de dama, caballero y niños, calzado, juguetes y accesorios, nuevos o seminuevos, limpios y en buen estado.</p></div>
+    <div><h4>No aceptamos</h4><p>Ropa interior, prendas rotas, manchadas o con mal olor, juguetes incompletos o que no funcionen.</p></div>
+  </div>
+</section>
+
+<section class="v-form" id="formulario">
+  <h2 class="fila-t centro"><span>Cuéntanos qué quieres vender</span></h2>
+  <form id="formVender">
+    <label>Nombre<input name="nombre" required autocomplete="name"></label>
+    <label>Teléfono / WhatsApp<input name="tel" required inputmode="tel" autocomplete="tel"></label>
+    <label>¿Qué quieres vender?
+      <select name="tipo">
+        <option>Ropa de dama</option><option>Ropa de caballero</option><option>Ropa de niña/niño</option>
+        <option>Juguetes</option><option>Calzado y accesorios</option><option>Varios</option>
+      </select></label>
+    <label>¿Cuántas piezas aprox.?<input name="piezas" type="number" min="1" value="10"></label>
+    <fieldset><legend>Opción que prefieres</legend>
+      <label class="radio"><input type="radio" name="opcion" value="Consignación" checked> Consignación ({{ cfg.CONSIGNA_PCT }}%)</label>
+      <label class="radio"><input type="radio" name="opcion" value="Compra directa"> Compra directa ({{ cfg.COMPRA_DIRECTA_PCT }}%)</label>
+      <label class="radio"><input type="radio" name="opcion" value="Aún no sé"> Aún no sé</label>
+    </fieldset>
+    <label class="ancho">Comentarios<textarea name="comentario" rows="3" placeholder="Marcas, tallas, estado…"></textarea></label>
+    <button class="btn-wa ancho">ENVIAR POR WHATSAPP</button>
+    <small class="ancho">Al enviar se abre WhatsApp con tus datos. Después te pediremos fotos de las piezas. Tratamos tus datos conforme a nuestro <a class="subraya" href="/aviso-de-privacidad" target="_blank">Aviso de privacidad</a>.</small>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>RB.vender({{ cfg.CONSIGNA_PCT }}, {{ cfg.COMPRA_DIRECTA_PCT }}, "{{ cfg.WHATSAPP }}");</script>
+{% endblock %}

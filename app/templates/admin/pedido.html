@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<a href="/admin/pedidos" class="volver">‹ Pedidos</a>
+<h1>{{ p.folio }} <span class="estado {{ p.estado }}">{{ p.estado_nombre }}</span> {% if p.pagado %}<span class="estado pagado">Pagado</span>{% elif p.estado != 'cancelado' %}<span class="estado sinpago">Sin pago</span>{% endif %}</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+{% if request.query_params.get('ok') == 'pago' %}<p class="ok">Pago registrado ✓</p>{% endif %}
+<p>{{ p.creado.strftime('%d/%m/%Y %H:%M') }}{% if p.usuario %} · cuenta: {{ p.usuario.email }}{% endif %}</p>
+<div class="pedido-in">
+  <ul class="carrito-lista ad-blanco">
+    {% for i in p.items %}
+    <li><img src="{{ i.foto or '/static/img/conejo.png' }}" alt=""><div><b>{{ i.nombre }}</b><small>{{ i.sku }}{% if i.talla %} · Talla {{ i.talla }}{% endif %}{% if i.producto %} · <a href="/admin/producto/{{ i.producto_id }}">ver producto</a>{% else %} · (producto eliminado){% endif %}</small></div><b>{% if i.cantidad > 1 %}<small>{{ i.cantidad }} × {{ i.precio|pesos }}</small><br>{% endif %}{{ i.total|pesos }}</b></li>
+    {% endfor %}
+  </ul>
+  <aside class="resumen">
+    <p><span>Subtotal</span><b>{{ p.subtotal|pesos }}</b></p>
+    <p><span>Entrega</span><b>{{ p.envio|pesos if p.envio else 'Por acordar' }}</b></p>
+    <p class="total"><span>Total</span><b>{{ p.total|pesos }}</b></p>
+    <h3>Entregar a</h3>
+    <small><b>{{ p.nombre }}</b> · {{ p.telefono }}<br>{{ p.municipio }}{% if p.direccion %} · punto preferido: <b>{{ p.direccion }}</b>{% else %} · punto por acordar{% endif %}{% if p.referencias %}<br>Ref: {{ p.referencias }}{% endif %}{% if p.notas %}<br>Notas: {{ p.notas }}{% endif %}</small>
+    <a href="{{ wa_cliente }}" target="_blank" rel="noopener" class="btn-wa ancho">WHATSAPP AL CLIENTE</a>
+    <h3 id="pago">Pago</h3>
+    {% if p.pagado %}
+    <div class="pago-ok">✓ <b>Pagado</b> · {{ p.monto_pagado|pesos }} en {{ p.metodo_nombre|lower }}<br><small>{{ p.fecha_pago.strftime('%d/%m/%Y') if p.fecha_pago }}{% if p.nota_pago %} · {{ p.nota_pago }}{% endif %}{% if p.monto_pagado != p.total %} · <b>diferencia {{ (p.monto_pagado - p.total)|pesos }}</b>{% endif %}</small></div>
+    <form method="post" action="/admin/pedidos/{{ p.id }}/pago/deshacer" onsubmit="return confirm('¿Quitar el pago registrado?')"><button class="mini">Deshacer pago</button></form>
+    {% elif p.estado == 'cancelado' %}<small>Pedido cancelado.</small>
+    {% else %}
+    <form method="post" action="/admin/pedidos/{{ p.id }}/pago" class="form-pago">
+      <label>Método<select name="metodo">{% for k, n in metodos %}<option value="{{ k }}">{{ n }}</option>{% endfor %}</select></label>
+      <label>Monto recibido<input name="monto" type="number" min="0" value="{{ p.total }}"></label>
+      <label>Fecha<input name="fecha" type="date" value="{{ hoy }}"></label>
+      <label>Nota <small>(opcional)</small><input name="nota" placeholder="Ej. folio de transferencia"></label>
+      <button class="btn-negro ancho">REGISTRAR PAGO</button>
+    </form>
+    {% endif %}
+    <h3>Cambiar estado</h3>
+    <form method="post" action="/admin/pedidos/{{ p.id }}/estado" class="estados-btns">
+      {% for k, n in estados %}{% if k != p.estado %}<button name="estado" value="{{ k }}" class="mini {{ 'rojo' if k == 'cancelado' }}">{{ n }}</button>{% endif %}{% endfor %}
+    </form>
+    <small><b>Entregado</b> registra las ventas (cuentan en tu resumen). <b>Cancelado</b> regresa las piezas a la venta.</small>
+  </aside>
+</div>
+{% endblock %}

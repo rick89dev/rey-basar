@@ -1,0 +1,15 @@
+{# Una venta como tarjeta (sirve en celular y escritorio). Requiere v, volver, mostrar_producto #}
+<li class="vf {{ 'devol' if v.es_devolucion }}">
+  <div class="vf-info">
+    {% if mostrar_producto %}<a href="{{ '/admin/producto/%d' % v.producto_id if v.producto_id else '#' }}"><b>{{ v.nombre }}</b></a> <small>{{ v.sku }}</small><br>{% endif %}
+    <small>{{ v.fecha.strftime('%d/%m/%Y %H:%M') }} ·
+      {% if v.es_devolucion %}<span class="tag rojo-tag">DEVOLUCIÓN</span>{% elif v.pedido_id %}<a href="/admin/pedidos/{{ v.pedido_id }}">Web P-{{ '%05d'|format(v.pedido_id) }}</a>{% else %}En persona{% endif %}
+      {% if v.devueltas and not v.es_devolucion %} · <span class="tag gris">{{ v.devueltas }} devuelta(s)</span>{% endif %}
+      {% if v.nota %} · {{ v.nota }}{% endif %}</small>
+  </div>
+  <div class="vf-num">
+    <b class="{{ 'neg' if v.es_devolucion }}">{{ '−' if v.es_devolucion }}{{ (v.total|abs)|pesos }}</b>
+    <small>{{ v.cantidad|abs }} × {{ v.precio_unitario|pesos }}{% if v.ganancia is not none %} · gan. <span class="{{ 'neg' if v.ganancia < 0 }}">{{ v.ganancia|pesos }}</span>{% endif %}</small>
+  </div>
+  <div class="vf-acc">{% include "admin/_venta_acciones.html" %}</div>
+</li>
