@@ -38,6 +38,7 @@
 
       <section class="mk-bloque mk-aprobar">
         <h2>Aprobar</h2>
+        {% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
         {% if pub.estado == 'programada' %}
           <p>Programada para el <b>{{ pub.programada_para.strftime('%d/%m/%Y a las %H:%M') }}</b>.</p>
           <form method="post" action="/admin/marketing/{{ pub.id }}/cancelar"><button class="mini">Quitar de programadas</button></form>

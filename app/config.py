@@ -1,6 +1,14 @@
 """Configuración de ReyBasar (variables de entorno con valores por defecto para el demo local)."""
 import os
+import time
 from pathlib import Path
+
+# La tienda vive en Cuernavaca: todas las horas (pedidos, contratos, publicaciones programadas) son
+# hora de Cuernavaca, aunque el servidor tenga el reloj en UTC. Sin esto, "programar a las 8 pm"
+# publicaba a las 2 pm y una hora de hoy en la tarde se rechazaba como "ya pasó" (nov 2026).
+ZONA_HORARIA = os.getenv("REYBASAR_TZ", "America/Mexico_City")
+os.environ["TZ"] = ZONA_HORARIA
+time.tzset()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
