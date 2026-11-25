@@ -61,6 +61,7 @@
         {% endif %}
       </section>
 
+      {% if pub.tipo != 'concepto' %}
       <section class="mk-bloque">
         <h2>Imagen</h2>
         <form method="post" action="/admin/marketing/{{ pub.id }}/imagen" class="mk-form">
@@ -73,6 +74,7 @@
           <button class="mini">↻ Rehacer imagen</button>
         </form>
       </section>
+      {% endif %}
     {% endif %}
 
     {% if piezas %}

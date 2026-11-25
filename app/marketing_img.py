@@ -231,3 +231,60 @@ def varios(productos: list, titulo: str = "Lo nuevo en ReyBasar") -> str:
     _logo(img, 220, ANCHO - 60 - 110, ALTO - 140)
     d.text((60, ALTO - 104), "reybasar.mx", font=_f("Bold", 40), fill=ORO)
     return _guardar(img)
+
+
+# ── conceptos con escena de IA ───────────────────────────────────────────────
+# La IA hace SOLO la escena (sin letras: los modelos de imagen todavia escriben mal). El texto,
+# el logo y el sitio los pone este codigo, con la tipografia de la marca, siempre bien escritos.
+
+def _degradado(img: Image.Image, arriba: bool, alto: int, fuerza: int = 235) -> None:
+    capa = Image.new("L", (1, alto))
+    for y in range(alto):
+        t = y / max(alto - 1, 1)
+        capa.putpixel((0, y), int(fuerza * ((1 - t) if arriba else t) ** 1.3))
+    capa = capa.resize((ANCHO, alto))
+    negro = Image.new("RGB", (ANCHO, alto), NEGRO)
+    y0 = 0 if arriba else ALTO - alto
+    zona = img.crop((0, y0, ANCHO, y0 + alto))
+    img.paste(Image.composite(negro, zona, capa), (0, y0))
+
+
+def concepto(escena: Image.Image, titulo: str, destacado: str = "", subtitulo: str = "",
+             llamada: str = "", texto_arriba: bool = True) -> str:
+    """Escena a sangre + frase grande (con una parte en dorado) + subtítulo + llamada + marca.
+    `destacado` es la parte de `titulo` que va en dorado (debe aparecer tal cual en el título)."""
+    img = ImageOps.fit(escena.convert("RGB"), (ANCHO, ALTO), Image.LANCZOS, centering=(0.5, 0.5))
+    _degradado(img, arriba=texto_arriba, alto=760)
+    _degradado(img, arriba=not texto_arriba, alto=300, fuerza=200)
+    d = ImageDraw.Draw(img)
+    margen = 70
+    f_t, renglones = _bloque(d, titulo, "Black", 124, ANCHO - 2 * margen, 3, 70)
+    alto_r = int(f_t.size * 1.02)
+    f_s, r_s = _bloque(d, subtitulo, "SemiBold", 46, ANCHO - 2 * margen, 3, 32) if subtitulo else (None, [])
+    alto_total = len(renglones) * alto_r + (len(r_s) * int(f_s.size * 1.28) + 26 if r_s else 0)
+    y = 90 if texto_arriba else ALTO - 300 - alto_total
+    for r in renglones:
+        x = margen
+        # pinta en dorado las palabras que forman parte de `destacado`
+        dest = set(destacado.lower().split())
+        for palabra in r.split(" "):
+            limpia = palabra.lower().strip(".,!¡?¿\"“”")
+            color = ORO if limpia and limpia in {w.strip(".,!¡?¿\"“”") for w in dest} else BLANCO
+            d.text((x + 4, y + 4), palabra, font=f_t, fill=NEGRO)   # sombra: legible sobre cualquier foto
+            d.text((x, y), palabra, font=f_t, fill=color)
+            x += d.textlength(palabra + " ", font=f_t)
+        y += alto_r
+    if r_s:
+        y += 26
+        for r in r_s:
+            d.text((margen + 2, y + 2), r, font=f_s, fill=NEGRO)
+            d.text((margen, y), r, font=f_s, fill=BLANCO)
+            y += int(f_s.size * 1.28)
+    # pie: llamada a la izquierda, logo a la derecha
+    if llamada:
+        f_l = _f("Bold", 40)
+        w = d.textlength(llamada, font=f_l)
+        d.rectangle((margen, ALTO - 150, margen + w + 40, ALTO - 84), fill=ORO)
+        d.text((margen + 20, ALTO - 147), llamada, font=f_l, fill=NEGRO)
+    _logo(img, 250, ANCHO - margen - 125, ALTO - 165)
+    return _guardar(img)
