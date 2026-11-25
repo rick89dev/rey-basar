@@ -231,7 +231,7 @@ def soltar_atoradas() -> None:
 # ── parrilla semanal ─────────────────────────────────────────────────────────
 PLAN = """Eres el director creativo de ReyBasar (tienda familiar de Cuernavaca de ropa y juguetes nuevos y
 seminuevos, que tambien compra lo que la gente ya no usa). Planea los temas de las publicaciones de
-"tema libre" de la semana: una por dia, en el orden de los dias que te paso.
+"tema libre" de los proximos dias: una por dia, en el orden de los dias que te paso.
 
 Mezcla tipos distintos, sin repetir dos iguales seguidos: humor/meme de la vida diaria de mamas y papas;
 moda y tendencias accesibles; consejo util (cuidar la ropa, ordenar el closet, tallas de ninos);

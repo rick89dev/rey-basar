@@ -333,6 +333,7 @@ def calendario(request: Request, ok: str, semana: int, db):
     campana_cargada = db.scalar(select(func.count()).where(Publicacion.tipo == "campana")) or 0
     return render(request, "admin/marketing_calendario.html", semanas=semanas, por_dia=por_dia, sin_fecha=sin_fecha,
                   primer_libre=_primer_dia_libre(db), en_stock=len(_piezas_para_semana(db, 99)),
+                  dias_parrilla=DIAS_PARRILLA,
                   hoy=hoy, semana=semana, dias=DIAS, estados=ESTADOS_PUBLICACION, conteo=conteo, ok=ok,
                   campana_cargada=campana_cargada, total_campana=len(CAMPANA),
                   fb_listo=bool(config.FB_PAGE_ID and config.FB_PAGE_TOKEN))
@@ -389,6 +390,7 @@ def fecha(pid: int, cuando: str = Form(""), yo: Usuario = Depends(solo_admin), d
 
 
 HORA_PRODUCTO, HORA_TEMA = 14, HORA_PROPUESTA
+DIAS_PARRILLA = 3   # Ricardo prefiere revisar de 3 en 3 dias (nov 2026)
 
 
 def _primer_dia_libre(db):
@@ -417,18 +419,18 @@ def _piezas_para_semana(db, cuantas: int) -> list[Producto]:
 
 @router.post("/parrilla")
 async def parrilla(inicio: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
-    """7 dias desde `inicio`: a las 2 pm una pieza en stock y a las 8 pm un tema libre de la IA."""
+    """DIAS_PARRILLA dias desde `inicio`: a las 2 pm una pieza en stock y a las 8 pm un tema libre de la IA."""
     try:
         primero = datetime.strptime(inicio, "%Y-%m-%d").date()
     except ValueError:
         primero = _primer_dia_libre(db)
     if primero <= datetime.now().date():
         primero = (datetime.now() + timedelta(days=1)).date()
-    dias = [primero + timedelta(days=i) for i in range(7)]
+    dias = [primero + timedelta(days=i) for i in range(DIAS_PARRILLA)]
     hay_ia = bool(config.OPENAI_API_KEY)
 
     trabajos_productos = []
-    piezas = _piezas_para_semana(db, 7)
+    piezas = _piezas_para_semana(db, DIAS_PARRILLA)
     for dia, p in zip(dias, piezas):
         texto, tags = _texto_plantilla([p])
         pub = Publicacion(tipo="producto", titulo=p.nombre[:120], productos=str(p.id), texto=texto, hashtags=tags,
