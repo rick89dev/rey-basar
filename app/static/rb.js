@@ -63,6 +63,15 @@ const RB = (() => {
     mins.forEach(b => b.onclick = () => ver(+b.dataset.i));
     const iz = $(".gal-flecha.izq", g), de = $(".gal-flecha.der", g);
     if (iz) { iz.onclick = () => ver(i - 1); de.onclick = () => ver(i + 1); }
+    if (imgs.length > 1) {   // deslizar con el dedo en celular
+      const zona = $(".galeria-principal", g); let x0 = null, y0 = 0;
+      zona.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      zona.addEventListener("touchend", e => {
+        if (x0 === null) return;
+        const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) ver(dx < 0 ? i + 1 : i - 1);
+      }, { passive: true });
+    }
   }
 
   function agregar() {
