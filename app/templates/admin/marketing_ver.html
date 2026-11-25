@@ -4,7 +4,7 @@
 <h1>{{ pub.titulo }}</h1>
 {% set avisos = {'creada': 'Publicación creada. Revísala y apruébala cuando te guste.', 'guardada': 'Cambios guardados.',
    'texto': 'La IA escribió un texto nuevo.', 'imagen': 'Imagen actualizada.',
-   'publicada': '¡Publicada en Facebook!', 'programada': 'Programada. Se publica sola a la hora que elegiste.'} %}
+   'publicada': '¡Publicada en Facebook!', 'fecha': 'Fecha actualizada.', 'programada': 'Programada. Se publica sola a la hora que elegiste.'} %}
 {% if ok in avisos %}<p class="ok">{{ avisos[ok] }}{% if ok == 'publicada' and pub.fb_url %} <a href="{{ pub.fb_url }}" target="_blank" rel="noopener">Verla en Facebook</a>{% endif %}</p>{% endif %}
 {% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
 {% if pub.error %}<p class="error">⚠ No se pudo publicar: {{ pub.error }}</p>{% endif %}
@@ -12,7 +12,7 @@
 
 <div class="mk-ver">
   <div class="mk-fb" aria-label="Vista previa en Facebook">
-    <div class="mk-fb-cab"><img src="/static/img/icon-192.png" alt="" width="40" height="40"><div><b>Rey Basar</b><small>{% if pub.estado == 'publicada' and pub.publicada_en %}{{ pub.publicada_en.strftime('%d/%m/%Y %H:%M') }}{% elif pub.estado == 'programada' and pub.programada_para %}Programada · {{ pub.programada_para.strftime('%d/%m/%Y %H:%M') }}{% else %}Vista previa{% endif %} · 🌐</small></div></div>
+    <div class="mk-fb-cab"><img src="/static/img/icon-192.png" alt="" width="40" height="40"><div><b>Rey Basar</b><small>{% if pub.estado == 'publicada' and pub.publicada_en %}{{ pub.publicada_en.strftime('%d/%m/%Y %H:%M') }}{% elif pub.estado == 'programada' and pub.programada_para %}Programada · {{ pub.programada_para.strftime('%d/%m/%Y %H:%M') }}{% elif pub.propuesta_para %}Propuesta · {{ pub.propuesta_para.strftime('%d/%m/%Y %H:%M') }}{% else %}Vista previa{% endif %} · 🌐</small></div></div>
     <div class="mk-fb-texto" id="pvTexto">{{ pub.texto }}</div>
     <div class="mk-fb-tags" id="pvTags">{{ pub.hashtags }}</div>
     {% if pub.imagen %}<img src="{{ pub.imagen_url }}" alt="Imagen de la publicación" class="mk-fb-img" width="1080" height="1350">{% endif %}
@@ -33,9 +33,13 @@
         <form method="post" action="/admin/marketing/{{ pub.id }}/publicar" onsubmit="return confirm('¿Publicar ahora en la página de Facebook de ReyBasar?')">
           <button class="btn-negro" {{ 'disabled' if not fb_listo }}>PUBLICAR AHORA</button>
         </form>
+        {% if pub.estado == 'borrador' %}
+        <p class="mk-propuesta">Fecha propuesta: <b>{{ pub.propuesta_para.strftime('%d/%m/%Y a las %H:%M') if pub.propuesta_para else 'sin fecha' }}</b>. Programar la deja lista para esa hora.</p>
+        {% endif %}
         <form method="post" action="/admin/marketing/{{ pub.id }}/programar" class="mk-programar">
-          <label>O programar para<input type="datetime-local" name="cuando" required value="{{ (pub.programada_para or sugerida).strftime('%Y-%m-%dT%H:%M') }}"></label>
+          <label>{{ 'Día y hora' if pub.estado == 'programada' else 'Programar para' }}<input type="datetime-local" name="cuando" required value="{{ (pub.programada_para or sugerida).strftime('%Y-%m-%dT%H:%M') }}"></label>
           <button class="btn-negro-borde">{{ 'CAMBIAR HORA' if pub.estado == 'programada' else 'PROGRAMAR' }}</button>
+          {% if pub.estado == 'borrador' %}<button class="mini" formaction="/admin/marketing/{{ pub.id }}/fecha">Solo guardar fecha (sin aprobar)</button>{% endif %}
         </form>
         {% if pub.estado == 'descartada' %}
           <form method="post" action="/admin/marketing/{{ pub.id }}/cancelar"><button class="mini">Regresar a Por aprobar</button></form>

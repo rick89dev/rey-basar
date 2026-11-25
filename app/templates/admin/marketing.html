@@ -11,6 +11,7 @@
 </form>
 {% endif %}
 <nav class="filtros mk-estados">
+  <a href="/admin/marketing">Calendario</a>
   {% for k, n in estados %}<a href="?estado={{ k }}" class="{{ 'on' if estado == k }}">{{ n }} ({{ conteo.get(k, 0) }})</a>{% endfor %}
 </nav>
 {% if pubs %}
@@ -22,6 +23,7 @@
       <b>{{ p.titulo }}</b>
       <small>{% if p.estado == 'programada' and p.programada_para %}Se publica el {{ p.programada_para.strftime('%d/%m %H:%M') }}
         {% elif p.estado == 'publicada' and p.publicada_en %}Publicada el {{ p.publicada_en.strftime('%d/%m %H:%M') }}
+        {% elif p.estado == 'borrador' and p.propuesta_para %}Propuesta: {{ p.propuesta_para.strftime('%d/%m %H:%M') }}
         {% else %}{{ 'Campaña' if p.tipo == 'campana' else 'Productos' }}{% endif %}</small>
       {% if p.error %}<small class="neg">⚠ {{ p.error[:80] }}</small>{% endif %}
     </div>

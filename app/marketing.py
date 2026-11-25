@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
@@ -110,6 +110,39 @@ CAMPANA = [
 ]
 
 
+HORA_PROPUESTA = 20   # 8 pm: cuando las familias revisan el celular
+
+
+def _dias_ocupados(db) -> set:
+    dias = set()
+    for p in db.scalars(select(Publicacion).where(Publicacion.estado.in_(("borrador", "programada")))):
+        if p.fecha:
+            dias.add(p.fecha.date())
+    return dias
+
+
+def siguiente_libre(db, ocupados: set | None = None) -> datetime:
+    """Primer día desde mañana sin otra publicación por aprobar o programada, a las 8 pm."""
+    ocupados = _dias_ocupados(db) if ocupados is None else ocupados
+    dia = (datetime.now() + timedelta(days=1)).replace(hour=HORA_PROPUESTA, minute=0, second=0, microsecond=0)
+    while dia.date() in ocupados:
+        dia += timedelta(days=1)
+    ocupados.add(dia.date())
+    return dia
+
+
+def proponer_fechas(db) -> int:
+    """Da fecha propuesta, en orden, a las publicaciones por aprobar que no tienen."""
+    ocupados = _dias_ocupados(db)
+    sin = list(db.scalars(select(Publicacion).where(Publicacion.estado == "borrador",
+                                                    Publicacion.propuesta_para.is_(None))
+                          .order_by(Publicacion.orden, Publicacion.id)))
+    for p in sin:
+        p.propuesta_para = siguiente_libre(db, ocupados)
+    db.commit()
+    return len(sin)
+
+
 def _telefono() -> str:
     t = "".join(c for c in config.WHATSAPP if c.isdigit())[-10:]
     return f"{t[:3]} {t[3:6]} {t[6:]}" if len(t) == 10 else config.WHATSAPP
@@ -129,6 +162,7 @@ def cargar_campana(db) -> int:
                            imagen=marketing_img.tarjeta(enc, sub)))
         nuevas += 1
     db.commit()
+    proponer_fechas(db)
     return nuevas
 
 
@@ -259,11 +293,15 @@ async def bucle_programadas() -> None:
 
 
 # ── pantallas ────────────────────────────────────────────────────────────────
+SEMANAS = 4
+DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+
+
 @router.get("", response_class=HTMLResponse)
-def lista(request: Request, estado: str = "borrador", ok: str = "", yo: Usuario = Depends(solo_admin),
+def lista(request: Request, estado: str = "", ok: str = "", semana: int = 0, yo: Usuario = Depends(solo_admin),
           db=Depends(get_db)):
     if estado not in dict(ESTADOS_PUBLICACION):
-        estado = "borrador"
+        return calendario(request, ok, semana, db)
     orden = {"borrador": (Publicacion.orden, Publicacion.id), "programada": (Publicacion.programada_para,),
              "publicada": (Publicacion.publicada_en.desc(),), "descartada": (Publicacion.id.desc(),)}[estado]
     pubs = list(db.scalars(select(Publicacion).where(Publicacion.estado == estado).order_by(*orden)))
@@ -272,6 +310,81 @@ def lista(request: Request, estado: str = "borrador", ok: str = "", yo: Usuario 
     return render(request, "admin/marketing.html", pubs=pubs, estado=estado, estados=ESTADOS_PUBLICACION,
                   conteo=conteo, ok=ok, campana_cargada=campana_cargada, total_campana=len(CAMPANA),
                   fb_listo=bool(config.FB_PAGE_ID and config.FB_PAGE_TOKEN))
+
+
+def calendario(request: Request, ok: str, semana: int, db):
+    hoy = datetime.now().date()
+    inicio = hoy - timedelta(days=hoy.weekday()) + timedelta(weeks=max(min(semana, 52), -52))
+    fin = inicio + timedelta(weeks=SEMANAS)
+    por_dia: dict = {}
+    sin_fecha = []
+    for p in db.scalars(select(Publicacion).where(Publicacion.estado.in_(("borrador", "programada", "publicada")))
+                        .order_by(Publicacion.orden, Publicacion.id)):
+        f = p.fecha
+        if f is None:
+            if p.estado == "borrador":
+                sin_fecha.append(p)
+        elif inicio <= f.date() < fin:
+            por_dia.setdefault(f.date(), []).append(p)
+    for lista_dia in por_dia.values():
+        lista_dia.sort(key=lambda p: p.fecha)
+    semanas = [[inicio + timedelta(days=7 * s + d) for d in range(7)] for s in range(SEMANAS)]
+    conteo = dict(db.execute(select(Publicacion.estado, func.count()).group_by(Publicacion.estado)).all())
+    campana_cargada = db.scalar(select(func.count()).where(Publicacion.tipo == "campana")) or 0
+    return render(request, "admin/marketing_calendario.html", semanas=semanas, por_dia=por_dia, sin_fecha=sin_fecha,
+                  hoy=hoy, semana=semana, dias=DIAS, estados=ESTADOS_PUBLICACION, conteo=conteo, ok=ok,
+                  campana_cargada=campana_cargada, total_campana=len(CAMPANA),
+                  fb_listo=bool(config.FB_PAGE_ID and config.FB_PAGE_TOKEN))
+
+
+@router.post("/proponer")
+def proponer(yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    proponer_fechas(db)
+    return _volver()
+
+
+def _mover(pub: Publicacion, nueva: datetime) -> str:
+    """Cambia la fecha de una por aprobar o programada. Devuelve el error o ''."""
+    if pub.estado not in ("borrador", "programada"):
+        return "Las publicaciones ya publicadas no se mueven."
+    if nueva <= datetime.now():
+        return "Esa fecha ya pasó: elige una más adelante."
+    if pub.estado == "programada":
+        pub.programada_para, pub.error = nueva, ""
+    else:
+        pub.propuesta_para = nueva
+    return ""
+
+
+@router.post("/{pid}/mover")
+def mover(pid: int, dia: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    """Arrastrar en el calendario: cambia el día y conserva la hora."""
+    pub = o404(db.get(Publicacion, pid))
+    try:
+        d = datetime.strptime(dia, "%Y-%m-%d")
+    except ValueError:
+        return JSONResponse({"error": "Día inválido."}, 400)
+    actual = pub.fecha or d.replace(hour=HORA_PROPUESTA)
+    error = _mover(pub, d.replace(hour=actual.hour, minute=actual.minute))
+    if error:
+        return JSONResponse({"error": error}, 400)
+    db.commit()
+    f = pub.fecha
+    return {"ok": True, "fecha": f.strftime("%Y-%m-%d %H:%M"), "hora": f.strftime("%H:%M")}
+
+
+@router.post("/{pid}/fecha")
+def fecha(pid: int, cuando: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    """Desde el detalle: día y hora exactos de la propuesta (o de la programada)."""
+    pub = o404(db.get(Publicacion, pid))
+    try:
+        error = _mover(pub, datetime.fromisoformat(cuando))
+    except ValueError:
+        error = "Elige día y hora."
+    if error:
+        return _volver(pid, error=error)
+    db.commit()
+    return _volver(pid, ok="fecha")
 
 
 @router.post("/campana")
@@ -309,7 +422,7 @@ async def crear(request: Request, yo: Usuario = Depends(solo_admin), db=Depends(
     nombre = piezas[0].nombre if len(piezas) == 1 else f"{titulo} ({len(piezas)} piezas)"
     pub = Publicacion(tipo="producto", titulo=nombre[:120], encabezado=titulo if len(piezas) > 1 else "",
                       productos=",".join(str(p.id) for p in piezas), texto=texto, hashtags=tags[:400],
-                      imagen=imagen, orden=-1)
+                      imagen=imagen, orden=-1, propuesta_para=siguiente_libre(db))
     db.add(pub)
     db.commit()
     return _volver(pub.id, ok="creada")
@@ -318,9 +431,11 @@ async def crear(request: Request, yo: Usuario = Depends(solo_admin), db=Depends(
 @router.get("/{pid}", response_class=HTMLResponse)
 def ver(request: Request, pid: int, ok: str = "", yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
     pub = o404(db.get(Publicacion, pid))
-    sugerida = datetime.now().replace(hour=20, minute=0, second=0, microsecond=0)
-    if sugerida <= datetime.now() + timedelta(minutes=15):
-        sugerida += timedelta(days=1)
+    sugerida = pub.propuesta_para
+    if not sugerida or sugerida <= datetime.now():
+        sugerida = datetime.now().replace(hour=HORA_PROPUESTA, minute=0, second=0, microsecond=0)
+        if sugerida <= datetime.now() + timedelta(minutes=15):
+            sugerida += timedelta(days=1)
     return render(request, "admin/marketing_ver.html", pub=pub, piezas=_productos(db, pub.ids_productos),
                   ok=ok, sugerida=sugerida, fb_listo=bool(config.FB_PAGE_ID and config.FB_PAGE_TOKEN))
 
@@ -400,6 +515,8 @@ def cancelar(pid: int, yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
     """Programada o descartada → vuelve a Por aprobar."""
     pub = o404(db.get(Publicacion, pid))
     if pub.estado in ("programada", "descartada"):
+        if pub.estado == "programada" and pub.programada_para and pub.programada_para > datetime.now():
+            pub.propuesta_para = pub.programada_para   # conserva el día que ya tenía
         pub.estado, pub.programada_para, pub.error = "borrador", None, ""
         db.commit()
     return _volver(pid)
@@ -411,4 +528,4 @@ def descartar(pid: int, yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
     if pub.estado in ("borrador", "programada"):
         pub.estado, pub.programada_para = "descartada", None
         db.commit()
-    return _volver(estado="borrador")
+    return _volver()

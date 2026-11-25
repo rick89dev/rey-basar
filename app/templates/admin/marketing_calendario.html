@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<div class="res-cab"><h1>Marketing</h1><div class="res-acciones"><a href="/admin/marketing/nueva" class="btn-negro">+ PUBLICACIÓN DE PRODUCTOS</a></div></div>
+{% if not fb_listo %}<p class="error">La página de Facebook todavía no está conectada en el servidor: puedes preparar y revisar publicaciones, pero no publicarlas.</p>{% endif %}
+{% if ok.startswith('campana:') %}<p class="ok">Campaña cargada: {{ ok.split(':')[1] }} publicaciones nuevas, cada una con su fecha propuesta.</p>{% endif %}
+{% if campana_cargada < total_campana %}
+<form method="post" action="/admin/marketing/campana" class="mk-campana">
+  <span><b>Campaña de arranque</b>: {{ total_campana }} publicaciones listas de "Estamos de regreso" y "Quiero vender".</span>
+  <button class="btn-negro-borde">CARGAR CAMPAÑA</button>
+</form>
+{% endif %}
+<nav class="filtros mk-estados">
+  <a href="/admin/marketing" class="on">Calendario</a>
+  {% for k, n in estados %}<a href="?estado={{ k }}">{{ n }} ({{ conteo.get(k, 0) }})</a>{% endfor %}
+</nav>
+<p class="ad-ayuda mk-leyenda">Arrastra una publicación a otro día para cambiar su fecha (la hora se conserva; la cambias dentro de la publicación). Ábrela para aprobarla.
+  <span class="mk-ley borrador">Por aprobar</span><span class="mk-ley programada">Programada</span><span class="mk-ley publicada">Publicada</span></p>
+<p class="error" id="mkAviso" hidden></p>
+
+<div class="mk-cal-wrap{{ ' con-lado' if sin_fecha }}">
+  {% if sin_fecha %}
+  <aside class="mk-sin" data-dia="">
+    <h2>Sin fecha ({{ sin_fecha|length }})</h2>
+    <form method="post" action="/admin/marketing/proponer"><button class="mini">Proponer fechas</button></form>
+    {% for p in sin_fecha %}{% include "admin/_mk_item.html" %}{% endfor %}
+  </aside>
+  {% endif %}
+  <div class="mk-cal">
+    <div class="mk-cal-nav">
+      <a href="?semana={{ semana - 1 }}" class="mini" aria-label="Semana anterior">‹ Anterior</a>
+      <b>{{ semanas[0][0].strftime('%d/%m') }} – {{ semanas[-1][-1].strftime('%d/%m/%Y') }}</b>
+      <span><a href="/admin/marketing" class="mini">Hoy</a> <a href="?semana={{ semana + 1 }}" class="mini" aria-label="Semana siguiente">Siguiente ›</a></span>
+    </div>
+    <div class="mk-cal-dias">{% for d in dias %}<span>{{ d }}</span>{% endfor %}</div>
+    <div class="mk-cal-grid">
+      {% for sem in semanas %}{% for dia in sem %}
+      <div class="mk-dia{{ ' hoy' if dia == hoy }}{{ ' pasado' if dia < hoy }}{{ ' vacio-dia' if dia not in por_dia }}" data-dia="{{ dia.isoformat() }}">
+        <div class="mk-dia-num"><span class="mk-dia-sem">{{ dias[dia.weekday()] }}</span> {{ dia.day }}{% if dia.day == 1 or loop.first %} <small>{{ ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][dia.month-1] }}</small>{% endif %}{% if dia == hoy %} <small>· hoy</small>{% endif %}</div>
+        {% for p in por_dia.get(dia, []) %}{% include "admin/_mk_item.html" %}{% endfor %}
+      </div>
+      {% endfor %}{% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const aviso=document.getElementById('mkAviso'); let arrastrando=null;
+  function avisar(t){ aviso.textContent=t; aviso.hidden=!t; if(t) setTimeout(()=>aviso.hidden=true,5000); }
+  document.querySelectorAll('.mk-item[draggable=true]').forEach(el=>{
+    el.addEventListener('dragstart',e=>{ arrastrando=el; el.classList.add('moviendo'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',el.dataset.id); });
+    el.addEventListener('dragend',()=>{ el.classList.remove('moviendo'); document.querySelectorAll('.sobre').forEach(x=>x.classList.remove('sobre')); });
+  });
+  document.querySelectorAll('.mk-dia:not(.pasado)').forEach(dia=>{
+    dia.addEventListener('dragover',e=>{ if(!arrastrando) return; e.preventDefault(); dia.classList.add('sobre'); });
+    dia.addEventListener('dragleave',()=>dia.classList.remove('sobre'));
+    dia.addEventListener('drop',async e=>{
+      e.preventDefault(); dia.classList.remove('sobre'); const el=arrastrando; arrastrando=null; if(!el) return;
+      if(el.parentNode===dia) return;
+      const origen=el.parentNode, antes=el.nextSibling;
+      dia.appendChild(el); dia.classList.remove('vacio-dia'); el.classList.add('guardando');
+      const datos=new FormData(); datos.append('dia',dia.dataset.dia);
+      try{
+        const r=await fetch('/admin/marketing/'+el.dataset.id+'/mover',{method:'POST',body:datos});
+        const j=await r.json();
+        if(!r.ok) throw new Error(j.error||'No se pudo mover.');
+        el.querySelector('.mk-hora').textContent=j.hora; avisar('');
+        if(origen.classList.contains('mk-sin')){ const n=origen.querySelectorAll('.mk-item').length; origen.querySelector('h2').textContent='Sin fecha ('+n+')'; }
+      }catch(err){ origen.insertBefore(el,antes); avisar(err.message); }
+      finally{ el.classList.remove('guardando'); }
+    });
+  });
+})();
+</script>
+{% endblock %}

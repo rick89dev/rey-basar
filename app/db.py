@@ -411,6 +411,9 @@ class Publicacion(Base):
     productos: Mapped[str] = mapped_column(String(200), default="")     # ids "3,8,12"
     estado: Mapped[str] = mapped_column(String(12), default="borrador", index=True)
     orden: Mapped[int] = mapped_column(Integer, default=0)
+    # Fecha que propone el sistema (o que el admin arrastra en el calendario) mientras está por
+    # aprobar. Al aprobar con "Programar" se vuelve programada_para.
+    propuesta_para: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     programada_para: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     publicada_en: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     fb_post_id: Mapped[str] = mapped_column(String(80), default="")
@@ -430,6 +433,12 @@ class Publicacion(Base):
     def mensaje(self) -> str:
         """Lo que se manda a Facebook: el texto y, al final, los hashtags."""
         return (self.texto.strip() + ("\n\n" + self.hashtags.strip() if self.hashtags.strip() else "")).strip()
+
+    @property
+    def fecha(self) -> datetime | None:
+        """La fecha que se ve en el calendario, según el estado."""
+        return {"borrador": self.propuesta_para, "programada": self.programada_para,
+                "publicada": self.publicada_en}.get(self.estado)
 
     @property
     def fb_url(self) -> str:
