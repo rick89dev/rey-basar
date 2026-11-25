@@ -409,6 +409,15 @@ class Publicacion(Base):
     encabezado: Mapped[str] = mapped_column(String(160), default="")
     subtitulo: Mapped[str] = mapped_column(String(200), default="")
     productos: Mapped[str] = mapped_column(String(200), default="")     # ids "3,8,12"
+    # Conceptos con escena de IA: lo necesario para recomponer la imagen sin pagar otra escena
+    destacado: Mapped[str] = mapped_column(String(160), default="")     # parte del encabezado en dorado
+    llamada: Mapped[str] = mapped_column(String(80), default="")        # etiqueta dorada del pie
+    texto_arriba: Mapped[bool] = mapped_column(Boolean, default=True)
+    escena: Mapped[str] = mapped_column(Text, default="")               # descripcion de la escena (para la IA)
+    escena_archivo: Mapped[str] = mapped_column(String(160), default="")  # escena sin texto, en marketing/
+    indicacion: Mapped[str] = mapped_column(Text, default="")           # ultima indicacion del admin a la IA
+    trabajando: Mapped[bool] = mapped_column(Boolean, default=False)    # la IA la esta rehaciendo
+    error_ia: Mapped[str] = mapped_column(String(300), default="")
     estado: Mapped[str] = mapped_column(String(12), default="borrador", index=True)
     orden: Mapped[int] = mapped_column(Integer, default=0)
     # Fecha que propone el sistema (o que el admin arrastra en el calendario) mientras está por

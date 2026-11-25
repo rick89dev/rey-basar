@@ -423,4 +423,6 @@ async def _revisor_programadas():
     # asi que no hay dos revisores compitiendo por la misma publicacion.
     import asyncio
     from .marketing import bucle_programadas
+    from .marketing_ia import soltar_atoradas
+    soltar_atoradas()
     app.state.revisor = asyncio.create_task(bucle_programadas())

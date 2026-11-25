@@ -1,13 +1,16 @@
 {% extends "admin/base.html" %}
 {% block contenido %}
+{% if pub.trabajando %}<meta http-equiv="refresh" content="6">{% endif %}
 <a href="/admin/marketing?estado={{ pub.estado }}" class="volver">‹ Marketing</a>
 <h1>{{ pub.titulo }}</h1>
 {% set avisos = {'creada': 'Publicación creada. Revísala y apruébala cuando te guste.', 'guardada': 'Cambios guardados.',
    'texto': 'La IA escribió un texto nuevo.', 'imagen': 'Imagen actualizada.',
-   'publicada': '¡Publicada en Facebook!', 'fecha': 'Fecha actualizada.', 'programada': 'Programada. Se publica sola a la hora que elegiste.'} %}
+   'publicada': '¡Publicada en Facebook!', 'trabajando': 'Listo, la IA empezó a trabajar.', 'fecha': 'Fecha actualizada.', 'programada': 'Programada. Se publica sola a la hora que elegiste.'} %}
 {% if ok in avisos %}<p class="ok">{{ avisos[ok] }}{% if ok == 'publicada' and pub.fb_url %} <a href="{{ pub.fb_url }}" target="_blank" rel="noopener">Verla en Facebook</a>{% endif %}</p>{% endif %}
 {% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
 {% if pub.error %}<p class="error">⚠ No se pudo publicar: {{ pub.error }}</p>{% endif %}
+{% if pub.trabajando %}<p class="mk-trabajando"><span class="mk-spin" aria-hidden="true"></span> La IA está trabajando en esta publicación{{ ' (crear la escena tarda 1 a 2 minutos)' if pub.tipo != 'producto' }}. La página se actualiza sola.</p>{% endif %}
+{% if pub.error_ia %}<p class="error">⚠ {{ pub.error_ia }}</p>{% endif %}
 {% if not fb_listo %}<p class="error">La página de Facebook todavía no está conectada en el servidor: puedes revisar y editar, pero no publicar.</p>{% endif %}
 
 <div class="mk-ver">
@@ -24,6 +27,15 @@
       <div class="firma-ok"><p>✓ Publicada el <b>{{ pub.publicada_en.strftime('%d/%m/%Y a las %H:%M') }}</b>{% if pub.aprobada_por %} · aprobó {{ pub.aprobada_por }}{% endif %}.</p>
         {% if pub.fb_url %}<p><a href="{{ pub.fb_url }}" target="_blank" rel="noopener" class="btn-negro-borde">VER EN FACEBOOK</a></p>{% endif %}</div>
     {% else %}
+      <section class="mk-bloque mk-ia">
+        <h2>✨ Pedirle cambios a la IA</h2>
+        <form method="post" action="/admin/marketing/{{ pub.id }}/retrabajar" class="mk-form" onsubmit="this.querySelector('button').disabled=true">
+          <label>Indicación<textarea name="indicacion" rows="3" placeholder="Ej.: más divertido · título más corto · que salga una mamá doblando ropa · enfocado en regreso a clases">{{ pub.indicacion if pub.tipo != 'producto' else '' }}</textarea></label>
+          <button class="btn-negro" {{ 'disabled' if pub.trabajando }}>RETRABAJAR CON IA</button>
+        </form>
+        <small>{% if pub.tipo == 'producto' %}Solo cambia el texto y los hashtags; la imagen se queda con las fotos reales.{% elif pub.tipo == 'campana' %}La convierte en un concepto con escena hecha por IA. Tarda 1 a 2 minutos.{% else %}Rehace título, texto y, si lo pides, la escena. Si solo pides cambios de texto, conserva la escena.{% endif %}</small>
+      </section>
+
       <section class="mk-bloque mk-aprobar">
         <h2>Aprobar</h2>
         {% if pub.estado == 'programada' %}
@@ -31,7 +43,7 @@
           <form method="post" action="/admin/marketing/{{ pub.id }}/cancelar"><button class="mini">Quitar de programadas</button></form>
         {% endif %}
         <form method="post" action="/admin/marketing/{{ pub.id }}/publicar" onsubmit="return confirm('¿Publicar ahora en la página de Facebook de ReyBasar?')">
-          <button class="btn-negro" {{ 'disabled' if not fb_listo }}>PUBLICAR AHORA</button>
+          <button class="btn-negro" {{ 'disabled' if not fb_listo or pub.trabajando }}>PUBLICAR AHORA</button>
         </form>
         {% if pub.estado == 'borrador' %}
         <p class="mk-propuesta">Fecha propuesta: <b>{{ pub.propuesta_para.strftime('%d/%m/%Y a las %H:%M') if pub.propuesta_para else 'sin fecha' }}</b>. Programar la deja lista para esa hora.</p>

@@ -1,4 +1,4 @@
 <a href="/admin/marketing/{{ p.id }}" class="mk-item {{ p.estado }}" data-id="{{ p.id }}" draggable="{{ 'true' if p.estado in ('borrador', 'programada') else 'false' }}" title="{{ p.titulo }}">
   {% if p.imagen %}<img src="{{ p.imagen_url }}" alt="" loading="lazy" width="40" height="50" draggable="false">{% endif %}
-  <span><span class="mk-hora">{{ p.fecha.strftime('%H:%M') if p.fecha else '' }}</span><b>{{ p.titulo }}</b>{% if p.error %}<i class="neg">⚠ error</i>{% endif %}</span>
+  <span><span class="mk-hora">{{ p.fecha.strftime('%H:%M') if p.fecha else '' }}</span><b>{{ p.titulo }}</b>{% if p.trabajando %}<i class="mk-ia-tag">✨ IA trabajando…</i>{% elif p.error or p.error_ia %}<i class="neg">⚠ error</i>{% endif %}</span>
 </a>

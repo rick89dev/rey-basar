@@ -1,7 +1,19 @@
 {% extends "admin/base.html" %}
 {% block contenido %}
-<div class="res-cab"><h1>Marketing</h1><div class="res-acciones"><a href="/admin/marketing/nueva" class="btn-negro">+ PUBLICACIÓN DE PRODUCTOS</a></div></div>
+<div class="res-cab"><h1>Marketing</h1><div class="res-acciones"><a href="/admin/marketing/nueva" class="btn-negro-borde">+ PRODUCTOS</a><button type="button" class="btn-negro-borde" onclick="document.getElementById('mkIdea').hidden=false;document.getElementById('mkIdeaTxt').focus()">✨ IDEA CON IA</button><button type="button" class="btn-negro" onclick="document.getElementById('mkParrilla').hidden=false">GENERAR SEMANA</button></div></div>
+<form method="post" action="/admin/marketing/parrilla" class="mk-idea" id="mkParrilla" hidden onsubmit="this.querySelector('.btn-negro').disabled=true">
+  <p><b>14 propuestas para 7 días:</b> cada día, a las 2:00 p.m. una pieza en stock (primero las que nunca has publicado) y a las 8:00 p.m. un tema libre que planea la IA. Todo queda por aprobar. Las escenas tardan unos 10 minutos en total.</p>
+  {% if en_stock < 7 %}<p class="neg">Solo hay {{ en_stock }} pieza(s) en stock con foto: se crearán {{ en_stock }} publicaciones de producto y 7 de tema libre.</p>{% endif %}
+  <label class="mk-inicio">Empezar el<input type="date" name="inicio" value="{{ primer_libre.isoformat() }}"></label>
+  <div><button class="btn-negro">GENERAR 14 PROPUESTAS</button> <button type="button" class="mini" onclick="this.closest('form').hidden=true">Cancelar</button></div>
+</form>
+<form method="post" action="/admin/marketing/idea" class="mk-idea" id="mkIdea" hidden onsubmit="this.querySelector('button').disabled=true">
+  <label>¿Qué quieres publicar? La IA arma la imagen, el texto y los hashtags; tú la revisas antes de publicar.
+    <textarea name="idea" id="mkIdeaTxt" rows="3" required placeholder="Ej.: regreso a clases con uniformes y mochilas · día de las madres · ola de calor, cosas para la alberca"></textarea></label>
+  <div><button class="btn-negro">CREAR CON IA</button> <button type="button" class="mini" onclick="this.closest('form').hidden=true">Cancelar</button></div>
+</form>
 {% if not fb_listo %}<p class="error">La página de Facebook todavía no está conectada en el servidor: puedes preparar y revisar publicaciones, pero no publicarlas.</p>{% endif %}
+{% if ok.startswith('parrilla:') %}<p class="ok">Semana generada: {{ ok.split(':')[1] }} de productos y 7 de tema libre. La IA está terminando las escenas en segundo plano (unos 10 minutos); puedes seguir trabajando.</p>{% endif %}
 {% if ok.startswith('campana:') %}<p class="ok">Campaña cargada: {{ ok.split(':')[1] }} publicaciones nuevas, cada una con su fecha propuesta.</p>{% endif %}
 {% if campana_cargada < total_campana %}
 <form method="post" action="/admin/marketing/campana" class="mk-campana">

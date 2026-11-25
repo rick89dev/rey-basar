@@ -86,9 +86,12 @@ def main() -> None:
             print("Generando:", c["titulo"])
             escena = generar_escena(cliente, c["escena"])
             imagen = marketing_img.concepto(escena, c["titulo"], c["destacado"], c["subtitulo"], c["llamada"], c["arriba"])
+            from app.marketing_ia import _guardar_escena
             pub = Publicacion(tipo="concepto", titulo=f"Prueba IA · {c['titulo']}"[:120], texto=c["texto"],
                               hashtags=f"{BASE_HASHTAGS} {c['tags']}", imagen=imagen,
-                              propuesta_para=siguiente_libre(db))
+                              propuesta_para=siguiente_libre(db), encabezado=c["titulo"],
+                              destacado=c["destacado"], subtitulo=c["subtitulo"], llamada=c["llamada"],
+                              texto_arriba=c["arriba"], escena=c["escena"], escena_archivo=_guardar_escena(escena))
             db.add(pub)
             db.commit()
             print(f"   listo: {config.SITIO_URL}/admin/marketing/{pub.id}")

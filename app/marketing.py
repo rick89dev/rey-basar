@@ -23,7 +23,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from . import config, marketing_img
+from . import config, marketing_ia, marketing_img
 from .admin_extra import solo_admin
 from .db import ESTADOS_PUBLICACION, Producto, Publicacion, SessionLocal, Usuario
 from .web import get_db, o404, render
@@ -332,6 +332,7 @@ def calendario(request: Request, ok: str, semana: int, db):
     conteo = dict(db.execute(select(Publicacion.estado, func.count()).group_by(Publicacion.estado)).all())
     campana_cargada = db.scalar(select(func.count()).where(Publicacion.tipo == "campana")) or 0
     return render(request, "admin/marketing_calendario.html", semanas=semanas, por_dia=por_dia, sin_fecha=sin_fecha,
+                  primer_libre=_primer_dia_libre(db), en_stock=len(_piezas_para_semana(db, 99)),
                   hoy=hoy, semana=semana, dias=DIAS, estados=ESTADOS_PUBLICACION, conteo=conteo, ok=ok,
                   campana_cargada=campana_cargada, total_campana=len(CAMPANA),
                   fb_listo=bool(config.FB_PAGE_ID and config.FB_PAGE_TOKEN))
@@ -385,6 +386,103 @@ def fecha(pid: int, cuando: str = Form(""), yo: Usuario = Depends(solo_admin), d
         return _volver(pid, error=error)
     db.commit()
     return _volver(pid, ok="fecha")
+
+
+HORA_PRODUCTO, HORA_TEMA = 14, HORA_PROPUESTA
+
+
+def _primer_dia_libre(db):
+    ocupados = _dias_ocupados(db)
+    dia = (datetime.now() + timedelta(days=1)).date()
+    while dia in ocupados:
+        dia += timedelta(days=1)
+    return dia
+
+
+def _piezas_para_semana(db, cuantas: int) -> list[Producto]:
+    """En stock, primero las nunca publicadas ni propuestas; luego las que llevan mas tiempo sin salir."""
+    ultima: dict[int, datetime] = {}
+    for pub in db.scalars(select(Publicacion).where(Publicacion.tipo == "producto",
+                                                    Publicacion.estado != "descartada")):
+        fecha = pub.fecha or pub.creado
+        for i in pub.ids_productos:
+            if i not in ultima or fecha > ultima[i]:
+                ultima[i] = fecha
+    piezas = [p for p in db.scalars(select(Producto).options(selectinload(Producto.fotos))
+                                    .where(Producto.visible.is_(True), Producto.vendido.is_(False)))
+              if p.disponibles > 0 and p.fotos]
+    piezas.sort(key=lambda p: (p.id in ultima, ultima.get(p.id, datetime.min), -p.id))
+    return piezas[:cuantas]
+
+
+@router.post("/parrilla")
+async def parrilla(inicio: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    """7 dias desde `inicio`: a las 2 pm una pieza en stock y a las 8 pm un tema libre de la IA."""
+    try:
+        primero = datetime.strptime(inicio, "%Y-%m-%d").date()
+    except ValueError:
+        primero = _primer_dia_libre(db)
+    if primero <= datetime.now().date():
+        primero = (datetime.now() + timedelta(days=1)).date()
+    dias = [primero + timedelta(days=i) for i in range(7)]
+    hay_ia = bool(config.OPENAI_API_KEY)
+
+    trabajos_productos = []
+    piezas = _piezas_para_semana(db, 7)
+    for dia, p in zip(dias, piezas):
+        texto, tags = _texto_plantilla([p])
+        pub = Publicacion(tipo="producto", titulo=p.nombre[:120], productos=str(p.id), texto=texto, hashtags=tags,
+                          imagen=marketing_img.producto(p), orden=-1, trabajando=hay_ia,
+                          propuesta_para=datetime.combine(dia, datetime.min.time()).replace(hour=HORA_PRODUCTO))
+        db.add(pub)
+        db.flush()
+        trabajos_productos.append((pub.id, [_datos_pieza(p)]))
+
+    recientes = [t for (t,) in db.execute(select(Publicacion.titulo).where(Publicacion.tipo.in_(("concepto", "campana")))
+                                           .order_by(Publicacion.id.desc()).limit(30))]
+    conceptos = []
+    for dia in dias:
+        pub = Publicacion(tipo="concepto", titulo="Nueva idea: tema del día (la IA lo está planeando)",
+                          trabajando=hay_ia, error_ia="" if hay_ia else "Falta la clave de OpenAI en el servidor.",
+                          propuesta_para=datetime.combine(dia, datetime.min.time()).replace(hour=HORA_TEMA))
+        db.add(pub)
+        db.flush()
+        conceptos.append(pub.id)
+    db.commit()
+    if hay_ia:
+        marketing_ia.en_segundo_plano(marketing_ia.parrilla_sync, conceptos, dias, recientes, trabajos_productos)
+    semana = (primero - (datetime.now().date() - timedelta(days=datetime.now().weekday()))).days // 7
+    return _volver(ok=f"parrilla:{len(piezas)}", semana=max(semana, 0))
+
+
+@router.post("/idea")
+async def idea(idea: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    """Una idea suelta del admin -> la IA arma la publicacion completa en segundo plano."""
+    idea = idea.strip()[:1000]
+    if not idea:
+        return _volver()
+    pub = Publicacion(tipo="concepto", titulo=f"Nueva idea: {idea}"[:120], indicacion=idea,
+                      propuesta_para=siguiente_libre(db), trabajando=True)
+    db.add(pub)
+    db.commit()
+    marketing_ia.en_segundo_plano(marketing_ia.retrabajar_sync, pub.id, idea)
+    return _volver(pub.id, ok="trabajando")
+
+
+@router.post("/{pid}/retrabajar")
+async def retrabajar(pid: int, indicacion: str = Form(""), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    pub = o404(db.get(Publicacion, pid))
+    if pub.trabajando or not _editable(pub):
+        return _volver(pid)
+    indicacion = indicacion.strip()[:1000]
+    pub.indicacion, pub.trabajando, pub.error_ia = indicacion, True, ""
+    db.commit()
+    if pub.tipo == "producto":
+        datos = [_datos_pieza(p) for p in _productos(db, pub.ids_productos)]
+        marketing_ia.en_segundo_plano(marketing_ia.texto_con_indicacion_sync, pid, indicacion, datos)
+    else:
+        marketing_ia.en_segundo_plano(marketing_ia.retrabajar_sync, pid, indicacion)
+    return _volver(pid, ok="trabajando")
 
 
 @router.post("/campana")
@@ -489,7 +587,7 @@ def rehacer_imagen(pid: int, encabezado: str = Form(""), subtitulo: str = Form("
 @router.post("/{pid}/publicar")
 async def publicar(pid: int, yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
     pub = o404(db.get(Publicacion, pid))
-    if pub.estado in ("borrador", "programada", "descartada"):
+    if pub.estado in ("borrador", "programada", "descartada") and not pub.trabajando:
         pub.aprobada_por = yo.primer_nombre
         await _publicar(db, pub)
     return _volver(pid, ok="publicada" if pub.estado == "publicada" else "")
@@ -504,7 +602,7 @@ def programar(pid: int, cuando: str = Form(""), yo: Usuario = Depends(solo_admin
         return _volver(pid, error="Elige día y hora.")
     if fecha <= datetime.now():
         return _volver(pid, error="Esa hora ya pasó: elige una más adelante.")
-    if pub.estado in ("borrador", "programada", "descartada"):
+    if pub.estado in ("borrador", "programada", "descartada") and not pub.trabajando:
         pub.estado, pub.programada_para, pub.error, pub.aprobada_por = "programada", fecha, "", yo.primer_nombre
         db.commit()
     return _volver(pid, ok="programada")

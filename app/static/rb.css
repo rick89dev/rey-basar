@@ -776,3 +776,15 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
   .mk-dia-sem{display:inline}
   .mk-item{font-size:14px}.mk-item img{width:44px;height:55px}
 }
+.mk-ia{border-left:4px solid var(--oro)}
+.mk-ia small{color:#555}
+.mk-trabajando{display:flex;gap:10px;align-items:center;background:#fffbea;border-left:4px solid var(--oro);padding:10px 14px}
+.mk-spin{width:18px;height:18px;border:3px solid #e5d49a;border-top-color:#000;border-radius:50%;animation:mkgira 1s linear infinite;flex:none}
+@keyframes mkgira{to{transform:rotate(360deg)}}
+.mk-idea{background:#fff;border-left:4px solid var(--oro);padding:14px 16px;margin:0 0 16px;display:grid;gap:10px}
+.mk-idea label{display:grid;gap:6px}
+.mk-idea textarea{font:inherit;padding:8px;border:1px solid #999;width:100%}
+.mk-ia-tag{color:#8a6d00;font-style:normal;font-weight:600}
+.res-acciones{display:flex;gap:10px;flex-wrap:wrap}
+.mk-inicio{display:flex!important;gap:10px;align-items:center}.mk-inicio input{font:inherit;padding:6px 8px;border:1px solid #999}
+.res-acciones{align-items:stretch}.res-acciones>a,.res-acciones>button{display:inline-flex;align-items:center;justify-content:center}
