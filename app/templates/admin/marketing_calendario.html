@@ -25,7 +25,7 @@
   <a href="/admin/marketing" class="on">Calendario</a>
   {% for k, n in estados %}<a href="?estado={{ k }}">{{ n }} ({{ conteo.get(k, 0) }})</a>{% endfor %}
 </nav>
-<p class="ad-ayuda mk-leyenda">Arrastra una publicación a otro día para cambiar su fecha (la hora se conserva; la cambias dentro de la publicación). Ábrela para aprobarla.
+<p class="ad-ayuda mk-leyenda">Arrastra una publicación a otro día para cambiar su fecha (conserva su hora). Suéltala <b>encima de otra</b> para que intercambien día y hora. Ábrela para aprobarla.
   <span class="mk-ley borrador">Por aprobar</span><span class="mk-ley programada">Programada</span><span class="mk-ley publicada">Publicada</span></p>
 <p class="error" id="mkAviso" hidden></p>
 
@@ -61,6 +61,24 @@
   document.querySelectorAll('.mk-item[draggable=true]').forEach(el=>{
     el.addEventListener('dragstart',e=>{ arrastrando=el; el.classList.add('moviendo'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',el.dataset.id); });
     el.addEventListener('dragend',()=>{ el.classList.remove('moviendo'); document.querySelectorAll('.sobre').forEach(x=>x.classList.remove('sobre')); });
+  });
+  // Soltar encima de otra publicacion: intercambian dia y hora
+  document.querySelectorAll('.mk-item[draggable=true]').forEach(destino=>{
+    destino.addEventListener('dragover',e=>{ if(!arrastrando||arrastrando===destino) return; e.preventDefault(); e.stopPropagation(); destino.classList.add('sobre-item'); });
+    destino.addEventListener('dragleave',()=>destino.classList.remove('sobre-item'));
+    destino.addEventListener('drop',async e=>{
+      e.preventDefault(); e.stopPropagation(); destino.classList.remove('sobre-item');
+      const el=arrastrando; arrastrando=null; if(!el||el===destino) return;
+      if(el.parentNode.classList.contains('mk-sin')){ avisar('Primero suéltala en un día; luego puedes intercambiarla.'); return; }
+      const datos=new FormData(); datos.append('con',destino.dataset.id);
+      try{
+        const r=await fetch('/admin/marketing/'+el.dataset.id+'/intercambiar',{method:'POST',body:datos}); const j=await r.json();
+        if(!r.ok) throw new Error(j.error||'No se pudieron intercambiar.');
+        const ponerEn=(item,info)=>{ const dia=document.querySelector('.mk-dia[data-dia="'+info.dia+'"]'); item.querySelector('.mk-hora').textContent=info.hora;
+          if(dia){ dia.appendChild(item); dia.classList.remove('vacio-dia'); [...dia.querySelectorAll('.mk-item')].sort((x,y)=>x.querySelector('.mk-hora').textContent.localeCompare(y.querySelector('.mk-hora').textContent)).forEach(x=>dia.appendChild(x)); } };
+        ponerEn(el,j.a); ponerEn(destino,j.b); avisar('');
+      }catch(err){ avisar(err.message); }
+    });
   });
   document.querySelectorAll('.mk-dia:not(.pasado)').forEach(dia=>{
     dia.addEventListener('dragover',e=>{ if(!arrastrando) return; e.preventDefault(); dia.classList.add('sobre'); });

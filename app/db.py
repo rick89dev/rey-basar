@@ -440,8 +440,11 @@ class Publicacion(Base):
 
     @property
     def mensaje(self) -> str:
-        """Lo que se manda a Facebook: el texto y, al final, los hashtags."""
-        return (self.texto.strip() + ("\n\n" + self.hashtags.strip() if self.hashtags.strip() else "")).strip()
+        """Lo que se manda a Facebook: el texto y, al final, los hashtags. Los enlaces a la tienda van
+        siempre con https:// para que Facebook los haga clicables (sin el, a veces no lo hace)."""
+        import re
+        texto = re.sub(r"(?<![/\w.@])(www\.)?reybasar\.mx(?=[/\s.,;:!?)]|$)", "https://reybasar.mx", self.texto.strip())
+        return (texto + ("\n\n" + self.hashtags.strip() if self.hashtags.strip() else "")).strip()
 
     @property
     def fecha(self) -> datetime | None:

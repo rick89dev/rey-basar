@@ -151,7 +151,7 @@ def _telefono() -> str:
 def cargar_campana(db) -> int:
     """Crea en borrador las publicaciones de la campaña que todavía no existan."""
     ya = set(db.scalars(select(Publicacion.titulo).where(Publicacion.tipo == "campana")))
-    sitio = config.SITIO_URL.replace("https://", "")
+    sitio = config.SITIO_URL
     nuevas = 0
     for orden, (_, titulo, enc, sub, texto, tags) in enumerate(CAMPANA):
         if titulo in ya:
@@ -188,12 +188,12 @@ def _datos_pieza(p: Producto) -> dict:
     return {"nombre": p.nombre, "precio": p.precio, "precio_antes": p.precio_antes,
             "estado": "nuevo" if p.condicion == "nuevo" else "seminuevo", "talla": p.talla or None,
             "marca": p.marca or None, "categoria": p.categoria_nombre, "descripcion": p.descripcion[:400],
-            "enlace": f"{config.SITIO_URL.replace('https://', '')}/producto/{p.slug}"}
+            "enlace": f"{config.SITIO_URL}/producto/{p.slug}"}
 
 
 def _texto_plantilla(piezas: list[Producto]) -> tuple[str, str]:
     """Sin clave de OpenAI (o si falla): un texto sencillo y correcto con los datos reales."""
-    sitio = config.SITIO_URL.replace("https://", "")
+    sitio = config.SITIO_URL
     renglones = []
     for p in piezas:
         estado = "Nuevo" if p.condicion == "nuevo" else "Seminuevo"
@@ -215,7 +215,7 @@ async def texto_ia(piezas: list[Producto]) -> tuple[str, str]:
         r = await cliente.chat.completions.create(
             model=config.IA_MODELO, temperature=0.7,
             messages=[{"role": "system", "content": REGLAS.format(
-                          sitio=config.SITIO_URL.replace("https://", ""), telefono=_telefono())},
+                          sitio=config.SITIO_URL, telefono=_telefono())},
                       {"role": "user", "content": json.dumps([_datos_pieza(p) for p in piezas], ensure_ascii=False)}],
             response_format={"type": "json_schema",
                              "json_schema": {"name": "publicacion", "schema": ESQUEMA, "strict": True}})
@@ -373,6 +373,23 @@ def mover(pid: int, dia: str = Form(""), yo: Usuario = Depends(solo_admin), db=D
     db.commit()
     f = pub.fecha
     return {"ok": True, "fecha": f.strftime("%Y-%m-%d %H:%M"), "hora": f.strftime("%H:%M")}
+
+
+@router.post("/{pid}/intercambiar")
+def intercambiar(pid: int, con: int = Form(0), yo: Usuario = Depends(solo_admin), db=Depends(get_db)):
+    """Soltar una publicacion encima de otra: intercambian dia y hora (sirve para decidir cual va
+    a las 2 pm y cual a las 8 pm el mismo dia)."""
+    a, b = o404(db.get(Publicacion, pid)), o404(db.get(Publicacion, con))
+    fa, fb = a.fecha, b.fecha
+    if not (fa and fb) or a.id == b.id:
+        return JSONResponse({"error": "Las dos publicaciones necesitan fecha."}, 400)
+    error = _mover(a, fb) or _mover(b, fa)
+    if error:
+        db.rollback()
+        return JSONResponse({"error": error}, 400)
+    db.commit()
+    return {"ok": True, "a": {"dia": a.fecha.date().isoformat(), "hora": a.fecha.strftime("%H:%M")},
+            "b": {"dia": b.fecha.date().isoformat(), "hora": b.fecha.strftime("%H:%M")}}
 
 
 @router.post("/{pid}/fecha")

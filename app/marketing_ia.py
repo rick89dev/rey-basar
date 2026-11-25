@@ -37,7 +37,7 @@ REGLAS = """Eres el director creativo de ReyBasar, una tienda familiar de Cuerna
 ropa y juguetes NUEVOS y SEMINUEVOS (tambien electronicos, deportes y articulos de alberca), revisados y
 con fotos reales, con entregas solo en Cuernavaca en un punto que se acuerda con el cliente. Tambien
 COMPRA la ropa y los juguetes que la gente ya no usa y paga al momento, o los recibe a consignacion.
-Pedidos en reybasar.mx o por WhatsApp al {telefono}. Venderle a ReyBasar: reybasar.mx/quiero-vender.
+Pedidos en https://reybasar.mx o por WhatsApp al {telefono}. Venderle a ReyBasar: https://reybasar.mx/quiero-vender.
 
 Haces publicaciones de Facebook que detienen el scroll, como la mejor publicidad: UNA sola idea grande,
 que la persona se sienta identificada (mamas y papas de Cuernavaca, su casa, sus hijos, su closet), con
@@ -59,7 +59,7 @@ Devuelve:
   que se ve); false si basta con cambiar textos.
 - escena: descripcion EN INGLES de la foto (que se ve, donde, luz, composicion), sin texto en la imagen.
 - texto: la publicacion para Facebook, de 3 a 7 renglones cortos, que termine con la llamada a la accion
-  y el enlace (reybasar.mx o reybasar.mx/quiero-vender). Sin hashtags.
+  y el enlace completo con https:// (https://reybasar.mx o https://reybasar.mx/quiero-vender). Sin hashtags.
 - hashtags: de 5 a 8 en espanol separados por espacio; siempre #ReyBasar y #Cuernavaca."""
 
 ESQUEMA = {"type": "object", "additionalProperties": False,
@@ -187,7 +187,7 @@ def texto_con_indicacion_sync(pid: int, indicacion: str, piezas_datos: list[dict
             r = cliente.chat.completions.create(
                 model=config.IA_MODELO, temperature=0.8,
                 messages=[{"role": "system", "content": REGLAS_TEXTO.format(
-                              sitio=config.SITIO_URL.replace("https://", ""), telefono=_telefono())},
+                              sitio=config.SITIO_URL, telefono=_telefono())},
                           {"role": "user", "content": json.dumps(
                               {"piezas": piezas_datos, "texto_actual": pub.texto,
                                "indicacion_del_dueno": indicacion}, ensure_ascii=False)}],

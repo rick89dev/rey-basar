@@ -99,9 +99,19 @@
 </div>
 <script>
 (function(){
-  const t=document.getElementById('fTexto'), h=document.getElementById('fTags'); if(!t) return;
   const pt=document.getElementById('pvTexto'), ph=document.getElementById('pvTags');
-  t.addEventListener('input',()=>pt.textContent=t.value); h.addEventListener('input',()=>ph.textContent=h.value);
+  // Vista previa como en Facebook: los enlaces se pueden abrir (y los de la tienda van con https://)
+  function enlaces(txt){
+    const esc=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return esc.replace(/(^|[\s(])((?:https?:\/\/)?(?:www\.)?reybasar\.mx(?:\/[^\s),]*)?|https?:\/\/[^\s),]+)/g,(m,antes,url)=>{
+      const limpio=url.replace(/[.!?;:]+$/,''), resto=url.slice(limpio.length);
+      const href=/^https?:/.test(limpio)?limpio:'https://'+limpio.replace(/^www\./,'');
+      return antes+'<a href="'+href+'" target="_blank" rel="noopener">'+href+'</a>'+resto;
+    });
+  }
+  pt.innerHTML=enlaces(pt.textContent);
+  const t=document.getElementById('fTexto'), h=document.getElementById('fTags'); if(!t) return;
+  t.addEventListener('input',()=>pt.innerHTML=enlaces(t.value)); h.addEventListener('input',()=>ph.textContent=h.value);
 })();
 </script>
 {% endblock %}

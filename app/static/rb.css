@@ -788,3 +788,5 @@ a.fz-tarjeta:hover,.fz-tarjeta.activa{outline:2px solid var(--oro)}
 .res-acciones{display:flex;gap:10px;flex-wrap:wrap}
 .mk-inicio{display:flex!important;gap:10px;align-items:center}.mk-inicio input{font:inherit;padding:6px 8px;border:1px solid #999}
 .res-acciones{align-items:stretch}.res-acciones>a,.res-acciones>button{display:inline-flex;align-items:center;justify-content:center}
+.mk-fb-texto a{color:#1b5fc4;word-break:break-all}
+.mk-item.sobre-item{outline:3px dashed var(--oro);outline-offset:1px}
