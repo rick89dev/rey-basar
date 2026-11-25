@@ -408,8 +408,19 @@ def api_estado(pid: int, visible: bool | None = Form(None), db=Depends(get_db)):
 
 from .cuenta import router as router_cuenta  # noqa: E402
 from .admin_extra import router as router_admin_extra  # noqa: E402
+from .marketing import router as router_marketing  # noqa: E402
 from .contratos import router as router_contratos  # noqa: E402
 
 app.include_router(router_cuenta)
 app.include_router(router_admin_extra)
 app.include_router(router_contratos)
+app.include_router(router_marketing)
+
+
+@app.on_event("startup")
+async def _revisor_programadas():
+    # Publica en Facebook las programadas cuya hora llego. Un solo worker (ver reybasar.service),
+    # asi que no hay dos revisores compitiendo por la misma publicacion.
+    import asyncio
+    from .marketing import bucle_programadas
+    app.state.revisor = asyncio.create_task(bucle_programadas())

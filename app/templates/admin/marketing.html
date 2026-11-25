@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<div class="res-cab"><h1>Marketing</h1><div class="res-acciones"><a href="/admin/marketing/nueva" class="btn-negro">+ PUBLICACIÓN DE PRODUCTOS</a></div></div>
+<p class="ad-ayuda">Publicaciones para la página de Facebook. Nada se publica hasta que tú lo apruebas: abre cada una, revisa imagen, texto y hashtags, y publícala o prográmala.</p>
+{% if not fb_listo %}<p class="error">La página de Facebook todavía no está conectada en el servidor: puedes preparar y revisar publicaciones, pero no publicarlas.</p>{% endif %}
+{% if ok.startswith('campana:') %}<p class="ok">Campaña cargada: {{ ok.split(':')[1] }} publicaciones nuevas por aprobar.</p>{% endif %}
+{% if campana_cargada < total_campana %}
+<form method="post" action="/admin/marketing/campana" class="mk-campana">
+  <span><b>Campaña de arranque</b>: {{ total_campana }} publicaciones listas de "Estamos de regreso" y "Quiero vender".</span>
+  <button class="btn-negro-borde">CARGAR CAMPAÑA</button>
+</form>
+{% endif %}
+<nav class="filtros mk-estados">
+  {% for k, n in estados %}<a href="?estado={{ k }}" class="{{ 'on' if estado == k }}">{{ n }} ({{ conteo.get(k, 0) }})</a>{% endfor %}
+</nav>
+{% if pubs %}
+<div class="mk-grid">
+  {% for p in pubs %}
+  <a href="/admin/marketing/{{ p.id }}" class="mk-card">
+    {% if p.imagen %}<img src="{{ p.imagen_url }}" alt="" loading="lazy" width="216" height="270">{% endif %}
+    <div class="mk-card-info">
+      <b>{{ p.titulo }}</b>
+      <small>{% if p.estado == 'programada' and p.programada_para %}Se publica el {{ p.programada_para.strftime('%d/%m %H:%M') }}
+        {% elif p.estado == 'publicada' and p.publicada_en %}Publicada el {{ p.publicada_en.strftime('%d/%m %H:%M') }}
+        {% else %}{{ 'Campaña' if p.tipo == 'campana' else 'Productos' }}{% endif %}</small>
+      {% if p.error %}<small class="neg">⚠ {{ p.error[:80] }}</small>{% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}<div class="vacio"><img src="/static/img/conejo-300.webp" alt=""><p>No hay publicaciones aquí.</p></div>{% endif %}
+{% endblock %}

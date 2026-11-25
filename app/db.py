@@ -388,3 +388,50 @@ def _agregar_columnas_faltantes() -> None:
                 elif isinstance(default, (int, str)):
                     sql_default = f" DEFAULT {default!r}" if isinstance(default, str) else f" DEFAULT {default}"
                 con.execute(text(f'ALTER TABLE {tabla.name} ADD COLUMN {col.name} {tipo}{sql_default}'))
+
+
+ESTADOS_PUBLICACION = [("borrador", "Por aprobar"), ("programada", "Programadas"),
+                       ("publicada", "Publicadas"), ("descartada", "Descartadas")]
+
+
+class Publicacion(Base):
+    """Admin → Marketing: una publicación de Facebook. La IA o la campaña la dejan en borrador
+    y solo se publica cuando un admin la aprueba viendo la imagen final, el texto y los hashtags."""
+    __tablename__ = "publicaciones"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    tipo: Mapped[str] = mapped_column(String(20), default="producto")   # producto | campana
+    titulo: Mapped[str] = mapped_column(String(120), default="")        # solo para el admin
+    texto: Mapped[str] = mapped_column(Text, default="")
+    hashtags: Mapped[str] = mapped_column(String(400), default="")
+    imagen: Mapped[str] = mapped_column(String(160), default="")        # en MEDIA_DIR/marketing
+    # Para rehacer la imagen de una campaña sin volver a escribirla
+    encabezado: Mapped[str] = mapped_column(String(160), default="")
+    subtitulo: Mapped[str] = mapped_column(String(200), default="")
+    productos: Mapped[str] = mapped_column(String(200), default="")     # ids "3,8,12"
+    estado: Mapped[str] = mapped_column(String(12), default="borrador", index=True)
+    orden: Mapped[int] = mapped_column(Integer, default=0)
+    programada_para: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    publicada_en: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    fb_post_id: Mapped[str] = mapped_column(String(80), default="")
+    error: Mapped[str] = mapped_column(String(400), default="")
+    aprobada_por: Mapped[str] = mapped_column(String(60), default="")
+    creado: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+    @property
+    def imagen_url(self) -> str:
+        return f"/media/marketing/{self.imagen}" if self.imagen else ""
+
+    @property
+    def ids_productos(self) -> list[int]:
+        return [int(x) for x in self.productos.split(",") if x.strip().isdigit()]
+
+    @property
+    def mensaje(self) -> str:
+        """Lo que se manda a Facebook: el texto y, al final, los hashtags."""
+        return (self.texto.strip() + ("\n\n" + self.hashtags.strip() if self.hashtags.strip() else "")).strip()
+
+    @property
+    def fb_url(self) -> str:
+        return f"https://www.facebook.com/{self.fb_post_id}" if self.fb_post_id else ""
+

@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<a href="/admin/marketing" class="volver">‹ Marketing</a>
+<h1>Nueva publicación de productos</h1>
+<p class="ad-ayuda">Elige de 1 a {{ max_piezas }} piezas. Con una, la imagen lleva su foto, precio y estado; con varias, sale una cuadrícula con el título que escribas. La IA escribe el texto con los datos reales de cada pieza y tú lo revisas antes de publicar.</p>
+<form method="post" action="/admin/marketing/nueva" class="mk-nueva" id="mkNueva">
+  <label class="mk-titulo">Título de la imagen (si eliges varias)<input name="titulo" maxlength="60" placeholder="Lo nuevo en ReyBasar"></label>
+  {% if piezas %}
+  <div class="mk-piezas">
+    {% for p in piezas %}
+    <label class="mk-pieza">
+      <input type="checkbox" name="pieza" value="{{ p.id }}">
+      {% if p.foto %}<img src="{{ p.foto }}" alt="" loading="lazy" width="90" height="112">{% endif %}
+      <span><b>{{ p.nombre }}</b><br><small>{{ p.precio|pesos }} · {{ 'Nuevo' if p.condicion == 'nuevo' else 'Seminuevo' }}{% if p.talla %} · {{ p.talla }}{% endif %}</small>
+        {% if p.id in publicadas %}<br><small class="mk-ya">Publicada el {{ publicadas[p.id].strftime('%d/%m') }}</small>{% endif %}</span>
+    </label>
+    {% endfor %}
+  </div>
+  <div class="mk-barra"><span id="mkCuenta">0 piezas</span><button class="btn-negro" id="mkCrear" disabled>CREAR PUBLICACIÓN</button></div>
+  {% else %}<p>No hay piezas disponibles en la tienda.</p>{% endif %}
+</form>
+<script>
+(function(){
+  const f=document.getElementById('mkNueva'); if(!f) return;
+  const max={{ max_piezas }}, cajas=[...f.querySelectorAll('input[name=pieza]')], cuenta=document.getElementById('mkCuenta'), btn=document.getElementById('mkCrear');
+  function pintar(){ const n=cajas.filter(c=>c.checked).length; cuenta.textContent=n+(n===1?' pieza':' piezas')+' (máximo '+max+')';
+    btn.disabled=!n; cajas.forEach(c=>{ if(!c.checked) c.disabled=n>=max; c.closest('.mk-pieza').classList.toggle('on',c.checked); }); }
+  cajas.forEach(c=>c.addEventListener('change',pintar)); pintar();
+  f.addEventListener('submit',()=>{ btn.disabled=true; btn.textContent='CREANDO… (la IA está escribiendo)'; });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "admin/base.html" %}
+{% block contenido %}
+<a href="/admin/marketing?estado={{ pub.estado }}" class="volver">‹ Marketing</a>
+<h1>{{ pub.titulo }}</h1>
+{% set avisos = {'creada': 'Publicación creada. Revísala y apruébala cuando te guste.', 'guardada': 'Cambios guardados.',
+   'texto': 'La IA escribió un texto nuevo.', 'imagen': 'Imagen actualizada.',
+   'publicada': '¡Publicada en Facebook!', 'programada': 'Programada. Se publica sola a la hora que elegiste.'} %}
+{% if ok in avisos %}<p class="ok">{{ avisos[ok] }}{% if ok == 'publicada' and pub.fb_url %} <a href="{{ pub.fb_url }}" target="_blank" rel="noopener">Verla en Facebook</a>{% endif %}</p>{% endif %}
+{% if request.query_params.get('error') %}<p class="error">{{ request.query_params.get('error') }}</p>{% endif %}
+{% if pub.error %}<p class="error">⚠ No se pudo publicar: {{ pub.error }}</p>{% endif %}
+{% if not fb_listo %}<p class="error">La página de Facebook todavía no está conectada en el servidor: puedes revisar y editar, pero no publicar.</p>{% endif %}
+
+<div class="mk-ver">
+  <div class="mk-fb" aria-label="Vista previa en Facebook">
+    <div class="mk-fb-cab"><img src="/static/img/icon-192.png" alt="" width="40" height="40"><div><b>Rey Basar</b><small>{% if pub.estado == 'publicada' and pub.publicada_en %}{{ pub.publicada_en.strftime('%d/%m/%Y %H:%M') }}{% elif pub.estado == 'programada' and pub.programada_para %}Programada · {{ pub.programada_para.strftime('%d/%m/%Y %H:%M') }}{% else %}Vista previa{% endif %} · 🌐</small></div></div>
+    <div class="mk-fb-texto" id="pvTexto">{{ pub.texto }}</div>
+    <div class="mk-fb-tags" id="pvTags">{{ pub.hashtags }}</div>
+    {% if pub.imagen %}<img src="{{ pub.imagen_url }}" alt="Imagen de la publicación" class="mk-fb-img" width="1080" height="1350">{% endif %}
+    <div class="mk-fb-pie"><span>👍 Me gusta</span><span>💬 Comentar</span><span>↗ Compartir</span></div>
+  </div>
+
+  <div class="mk-panel">
+    {% if pub.estado == 'publicada' %}
+      <div class="firma-ok"><p>✓ Publicada el <b>{{ pub.publicada_en.strftime('%d/%m/%Y a las %H:%M') }}</b>{% if pub.aprobada_por %} · aprobó {{ pub.aprobada_por }}{% endif %}.</p>
+        {% if pub.fb_url %}<p><a href="{{ pub.fb_url }}" target="_blank" rel="noopener" class="btn-negro-borde">VER EN FACEBOOK</a></p>{% endif %}</div>
+    {% else %}
+      <section class="mk-bloque mk-aprobar">
+        <h2>Aprobar</h2>
+        {% if pub.estado == 'programada' %}
+          <p>Programada para el <b>{{ pub.programada_para.strftime('%d/%m/%Y a las %H:%M') }}</b>.</p>
+          <form method="post" action="/admin/marketing/{{ pub.id }}/cancelar"><button class="mini">Quitar de programadas</button></form>
+        {% endif %}
+        <form method="post" action="/admin/marketing/{{ pub.id }}/publicar" onsubmit="return confirm('¿Publicar ahora en la página de Facebook de ReyBasar?')">
+          <button class="btn-negro" {{ 'disabled' if not fb_listo }}>PUBLICAR AHORA</button>
+        </form>
+        <form method="post" action="/admin/marketing/{{ pub.id }}/programar" class="mk-programar">
+          <label>O programar para<input type="datetime-local" name="cuando" required value="{{ (pub.programada_para or sugerida).strftime('%Y-%m-%dT%H:%M') }}"></label>
+          <button class="btn-negro-borde">{{ 'CAMBIAR HORA' if pub.estado == 'programada' else 'PROGRAMAR' }}</button>
+        </form>
+        {% if pub.estado == 'descartada' %}
+          <form method="post" action="/admin/marketing/{{ pub.id }}/cancelar"><button class="mini">Regresar a Por aprobar</button></form>
+        {% else %}
+          <form method="post" action="/admin/marketing/{{ pub.id }}/descartar" onsubmit="return confirm('¿Descartar esta publicación?')"><button class="mini">Descartar</button></form>
+        {% endif %}
+      </section>
+
+      <section class="mk-bloque">
+        <h2>Texto y hashtags</h2>
+        <form method="post" action="/admin/marketing/{{ pub.id }}/guardar" class="mk-form">
+          <label>Texto<textarea name="texto" id="fTexto" rows="10">{{ pub.texto }}</textarea></label>
+          <label>Hashtags<input name="hashtags" id="fTags" value="{{ pub.hashtags }}"></label>
+          <button class="btn-negro-borde">GUARDAR CAMBIOS</button>
+        </form>
+        {% if pub.tipo == 'producto' and piezas %}
+        <form method="post" action="/admin/marketing/{{ pub.id }}/texto" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Escribiendo…'">
+          <button class="mini">✨ Rehacer texto con IA</button></form>
+        {% endif %}
+      </section>
+
+      <section class="mk-bloque">
+        <h2>Imagen</h2>
+        <form method="post" action="/admin/marketing/{{ pub.id }}/imagen" class="mk-form">
+          {% if pub.tipo == 'campana' %}
+            <label>Frase grande<input name="encabezado" value="{{ pub.encabezado }}" maxlength="160"></label>
+            <label>Frase chica<input name="subtitulo" value="{{ pub.subtitulo }}" maxlength="200"></label>
+          {% elif piezas|length > 1 %}
+            <label>Título de la imagen<input name="encabezado" value="{{ pub.encabezado }}" maxlength="60"></label>
+          {% endif %}
+          <button class="mini">↻ Rehacer imagen</button>
+        </form>
+      </section>
+    {% endif %}
+
+    {% if piezas %}
+    <section class="mk-bloque">
+      <h2>Piezas</h2>
+      <ul class="mk-mini">{% for p in piezas %}<li><a href="/producto/{{ p.slug }}" target="_blank">{{ p.nombre }}</a> · {{ p.precio|pesos }}{% if not p.visible or p.vendido or p.disponibles < 1 %} <span class="tag rojo-tag">YA NO ESTÁ DISPONIBLE</span>{% endif %}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+  </div>
+</div>
+<script>
+(function(){
+  const t=document.getElementById('fTexto'), h=document.getElementById('fTags'); if(!t) return;
+  const pt=document.getElementById('pvTexto'), ph=document.getElementById('pvTags');
+  t.addEventListener('input',()=>pt.textContent=t.value); h.addEventListener('input',()=>ph.textContent=h.value);
+})();
+</script>
+{% endblock %}

@@ -27,6 +27,13 @@ ADMINS = os.getenv("REYBASAR_ADMINS", "")
 DEMO = os.getenv("REYBASAR_DEMO", "") == "1"  # carga productos de ejemplo una vez (solo local)
 # IA para llenar fichas de producto desde el admin (misma clave de OpenAI que usa el bot)
 OPENAI_API_KEY = os.getenv("REYBASAR_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+
+# Página de Facebook de ReyBasar (Admin → Marketing publica ahí). Token de página permanente,
+# sacado de un token de usuario de larga duración. Vacío = el admin avisa y no publica.
+FB_PAGE_ID = os.getenv("REYBASAR_FB_PAGE_ID", "")
+FB_PAGE_TOKEN = os.getenv("REYBASAR_FB_PAGE_TOKEN", "")
+FB_GRAPH = os.getenv("REYBASAR_FB_GRAPH", "https://graph.facebook.com/v23.0")
+SITIO_URL = os.getenv("REYBASAR_SITIO_URL", "https://reybasar.mx")
 IA_MODELO = os.getenv("REYBASAR_IA_MODELO", "gpt-4o")
 BOT_TOKEN = os.getenv("REYBASAR_BOT_TOKEN", "")  # Bearer para el bot de WhatsApp
 
